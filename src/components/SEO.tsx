@@ -8,12 +8,12 @@ interface SEOProps {
 }
 
 const SEO = ({
-  title = "فروشگاه آنلاین | بهترین محصولات با بهترین قیمت",
-  description = "فروشگاه آنلاین با بهترین محصولات الکترونیک، کیف و کفش، دکوراسیون و اکسسوری. ارسال سریع به سراسر کشور با ضمانت اصالت کالا.",
+  title = "خرید لوازم آرایشی | محصولات اورجینال با ضمانت اصالت",
+  description = "خرید آنلاین لوازم آرایشی و بهداشتی اورجینال از برندهای معتبر. ارسال سریع به سراسر کشور با ضمانت اصالت کالا و بهترین قیمت.",
   image = "/og-image.png",
-  url = "https://foroshgah.ir",
+  url = "https://example.ir",
 }: SEOProps) => {
-  const fullTitle = title.includes("فروشگاه") ? title : `${title} | فروشگاه آنلاین`;
+  const fullTitle = title.includes("لوازم آرایشی") ? title : `${title} | لوازم آرایشی`;
 
   return (
     <Helmet>
