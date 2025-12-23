@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/shop/Layout";
 import ProductCard from "@/components/shop/ProductCard";
@@ -15,40 +15,33 @@ const Index = () => {
       <SEO />
       
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-bl from-primary/10 via-background to-accent/20">
-        <div className="container py-20 md:py-32">
-          <div className="max-w-2xl space-y-6 animate-fade-in">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent text-accent-foreground text-sm">
-              <Sparkles className="h-4 w-4" />
-              <span>تخفیف‌های ویژه فعال است</span>
-            </div>
-            <h1 className="text-4xl md:text-6xl font-bold leading-tight">
-              <span className="text-gradient">بهترین محصولات</span>
+      <section className="relative overflow-hidden bg-gradient-to-bl from-primary/5 via-background to-muted/30">
+        <div className="container py-16 md:py-24">
+          <div className="max-w-2xl space-y-5">
+            <span className="text-sm text-muted-foreground">ارسال رایگان برای خرید بالای ۵۰۰ هزار تومان</span>
+            <h1 className="text-3xl md:text-5xl font-bold leading-tight">
+              خرید لوازم آرایشی
               <br />
-              با بهترین قیمت
+              <span className="text-primary">اورجینال و با ضمانت</span>
             </h1>
-            <p className="text-lg text-muted-foreground">
-              فروشگاه آنلاین با مجموعه‌ای از محصولات باکیفیت. ارسال سریع به سراسر کشور با ضمانت اصالت کالا.
+            <p className="text-muted-foreground">
+              بهترین برندهای آرایشی و بهداشتی با تضمین اصالت کالا
             </p>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-3 pt-2">
               <Link to="/products">
                 <Button size="lg" className="gap-2">
                   مشاهده محصولات
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
               </Link>
-              <Link to="/products?category=الکترونیک">
+              <Link to="/products?category=مراقبت پوست">
                 <Button size="lg" variant="outline">
-                  الکترونیک
+                  مراقبت پوست
                 </Button>
               </Link>
             </div>
           </div>
         </div>
-        
-        {/* Decorative elements */}
-        <div className="absolute top-20 left-20 w-72 h-72 bg-primary/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/30 rounded-full blur-3xl" />
       </section>
 
       {/* Categories */}
@@ -112,18 +105,20 @@ const Index = () => {
       )}
 
       {/* CTA */}
-      <section className="py-20 bg-primary text-primary-foreground">
-        <div className="container text-center space-y-6">
-          <h2 className="text-3xl md:text-4xl font-bold">آماده خرید هستید؟</h2>
-          <p className="text-lg opacity-90 max-w-xl mx-auto">
-            همین حالا محصولات مورد علاقه خود را به سبد خرید اضافه کنید و از تخفیف‌های ویژه بهره‌مند شوید.
+      <section className="py-16 bg-muted/50">
+        <div className="container text-center space-y-4">
+          <h2 className="text-2xl md:text-3xl font-bold">مشاوره رایگان خرید</h2>
+          <p className="text-muted-foreground max-w-lg mx-auto">
+            برای انتخاب بهترین محصولات متناسب با نوع پوست خود، با کارشناسان ما تماس بگیرید.
           </p>
-          <Link to="/products">
-            <Button size="lg" variant="secondary" className="gap-2">
-              شروع خرید
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </Link>
+          <div className="flex justify-center gap-3 pt-2">
+            <Link to="/products">
+              <Button className="gap-2">
+                مشاهده محصولات
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
     </Layout>
