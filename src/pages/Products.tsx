@@ -3,16 +3,17 @@ import { useSearchParams } from "react-router-dom";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import Layout from "@/components/shop/Layout";
 import ProductCard from "@/components/shop/ProductCard";
 import SEO from "@/components/SEO";
-import { products, categories } from "@/data/products";
+import { useSite } from "@/contexts/SiteContext";
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "all");
+  
+  const { products, categories, isLoading, settings } = useSite();
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
@@ -21,10 +22,10 @@ const Products = () => {
         product.name.includes(searchQuery) ||
         product.description.includes(searchQuery);
       const matchesCategory =
-        selectedCategory === "all" || product.category === selectedCategory;
+        selectedCategory === "all" || product.category_id === selectedCategory;
       return matchesSearch && matchesCategory;
     });
-  }, [searchQuery, selectedCategory]);
+  }, [searchQuery, selectedCategory, products]);
 
   const handleCategoryChange = (categoryId: string) => {
     setSelectedCategory(categoryId);
@@ -50,7 +51,7 @@ const Products = () => {
     <Layout>
       <SEO
         title="محصولات"
-        description="مشاهده و خرید بهترین محصولات الکترونیک، کیف و کفش، دکوراسیون و اکسسوری با قیمت مناسب."
+        description={`مشاهده و خرید محصولات ${settings?.site_name || 'فروشگاه'}`}
       />
       
       <div className="container py-8">
@@ -74,6 +75,13 @@ const Products = () => {
 
           {/* Categories */}
           <div className="flex flex-wrap gap-2">
+            <Button
+              variant={selectedCategory === "all" ? "default" : "outline"}
+              size="sm"
+              onClick={() => handleCategoryChange("all")}
+            >
+              همه
+            </Button>
             {categories.map((category) => (
               <Button
                 key={category.id}
@@ -92,14 +100,33 @@ const Products = () => {
           {filteredProducts.length} محصول یافت شد
         </p>
 
+        {/* Loading */}
+        {isLoading && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="rounded-xl border bg-card animate-pulse">
+                <div className="aspect-square bg-muted" />
+                <div className="p-4 space-y-3">
+                  <div className="h-4 bg-muted rounded w-1/3" />
+                  <div className="h-5 bg-muted rounded w-2/3" />
+                  <div className="h-4 bg-muted rounded w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Products Grid */}
-        {filteredProducts.length > 0 ? (
+        {!isLoading && filteredProducts.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
-        ) : (
+        )}
+
+        {/* Empty State */}
+        {!isLoading && filteredProducts.length === 0 && (
           <div className="text-center py-20">
             <SlidersHorizontal className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">محصولی یافت نشد</h3>

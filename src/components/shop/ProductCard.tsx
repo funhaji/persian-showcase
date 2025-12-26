@@ -1,26 +1,53 @@
 import { Link } from "react-router-dom";
-import { Star, ShoppingCart } from "lucide-react";
+import { Star, ShoppingCart, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Product, formatPrice } from "@/data/products";
 import { useCart } from "@/contexts/CartContext";
+import { useSite } from "@/contexts/SiteContext";
 import { toast } from "sonner";
+import type { Product } from "@/types/database";
 
 interface ProductCardProps {
   product: Product;
 }
 
+export const formatPrice = (price: number): string => {
+  return price.toLocaleString("fa-IR") + " تومان";
+};
+
 const ProductCard = ({ product }: ProductCardProps) => {
   const { addToCart } = useCart();
-  const hasDiscount = product.originalPrice && product.originalPrice > product.price;
+  const { purchaseEnabled, categories } = useSite();
+  
+  const hasDiscount = product.original_price && product.original_price > product.price;
   const discountPercent = hasDiscount
-    ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)
+    ? Math.round(((product.original_price! - product.price) / product.original_price!) * 100)
     : 0;
+
+  const category = categories.find(c => c.id === product.category_id);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    addToCart(product);
+    
+    if (!purchaseEnabled) {
+      toast.info("خرید در حال حاضر غیرفعال است");
+      return;
+    }
+    
+    addToCart({
+      id: product.id,
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      originalPrice: product.original_price || undefined,
+      image: product.image,
+      category: category?.name || '',
+      rating: product.rating,
+      reviews: product.reviews,
+      inStock: product.in_stock,
+      featured: product.featured,
+    });
     toast.success(`${product.name} به سبد خرید اضافه شد`);
   };
 
@@ -46,12 +73,17 @@ const ProductCard = ({ product }: ProductCardProps) => {
             ویژه
           </Badge>
         )}
+        {!product.in_stock && (
+          <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
+            <span className="text-destructive font-bold">ناموجود</span>
+          </div>
+        )}
       </div>
 
       {/* Content */}
       <div className="p-4 space-y-3">
         <div>
-          <p className="text-xs text-muted-foreground mb-1">{product.category}</p>
+          <p className="text-xs text-muted-foreground mb-1">{category?.name}</p>
           <h3 className="font-semibold line-clamp-1 group-hover:text-primary transition-colors">
             {product.name}
           </h3>
@@ -70,17 +102,28 @@ const ProductCard = ({ product }: ProductCardProps) => {
             <p className="font-bold text-primary">{formatPrice(product.price)}</p>
             {hasDiscount && (
               <p className="text-xs text-muted-foreground line-through">
-                {formatPrice(product.originalPrice!)}
+                {formatPrice(product.original_price!)}
               </p>
             )}
           </div>
-          <Button
-            size="sm"
-            onClick={handleAddToCart}
-            className="opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            <ShoppingCart className="h-4 w-4" />
-          </Button>
+          {purchaseEnabled ? (
+            <Button
+              size="sm"
+              onClick={handleAddToCart}
+              disabled={!product.in_stock}
+              className="opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <ShoppingCart className="h-4 w-4" />
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="outline"
+              className="opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </div>
     </Link>
