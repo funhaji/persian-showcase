@@ -1,9 +1,9 @@
-import smartwatchImg from "@/assets/products/smartwatch.png";
-import headphonesImg from "@/assets/products/headphones.png";
-import backpackImg from "@/assets/products/backpack.png";
-import lampImg from "@/assets/products/lamp.png";
-import sunglassesImg from "@/assets/products/sunglasses.png";
-import walletImg from "@/assets/products/wallet.png";
+import serumImg from "@/assets/products/serum.png";
+import moisturizerImg from "@/assets/products/moisturizer.png";
+import maskImg from "@/assets/products/mask.png";
+import lipstickImg from "@/assets/products/lipstick.png";
+import eyeshadowImg from "@/assets/products/eyeshadow.png";
+import sunscreenImg from "@/assets/products/sunscreen.png";
 
 export interface Product {
   id: string;
@@ -26,7 +26,7 @@ export const products: Product[] = [
     description: "سرم روشن کننده و ضد لک با ۲۰٪ ویتامین سی خالص. مناسب برای انواع پوست.",
     price: 890000,
     originalPrice: 1100000,
-    image: smartwatchImg,
+    image: serumImg,
     category: "مراقبت پوست",
     rating: 4.8,
     reviews: 245,
@@ -38,7 +38,7 @@ export const products: Product[] = [
     name: "کرم مرطوب کننده",
     description: "کرم مرطوب کننده عمقی با اسید هیالورونیک. آبرسانی ۲۴ ساعته برای پوست خشک.",
     price: 750000,
-    image: headphonesImg,
+    image: moisturizerImg,
     category: "مراقبت پوست",
     rating: 4.9,
     reviews: 189,
@@ -51,7 +51,7 @@ export const products: Product[] = [
     description: "ماسک ورقه‌ای حاوی کلاژن و عصاره گل رز. سفت کننده و جوان کننده پوست.",
     price: 120000,
     originalPrice: 150000,
-    image: backpackImg,
+    image: maskImg,
     category: "ماسک صورت",
     rating: 4.6,
     reviews: 312,
@@ -62,7 +62,7 @@ export const products: Product[] = [
     name: "رژ لب مایع مات",
     description: "رژ لب مایع با ماندگاری بالا و فرمول سبک. رنگ یکدست و بدون خشکی.",
     price: 450000,
-    image: lampImg,
+    image: lipstickImg,
     category: "آرایش لب",
     rating: 4.7,
     reviews: 178,
@@ -75,7 +75,7 @@ export const products: Product[] = [
     description: "پالت ۱۲ رنگ با ترکیب مات و شاین. پیگمنت قوی و ماندگاری عالی.",
     price: 680000,
     originalPrice: 820000,
-    image: sunglassesImg,
+    image: eyeshadowImg,
     category: "آرایش چشم",
     rating: 4.5,
     reviews: 156,
@@ -86,7 +86,7 @@ export const products: Product[] = [
     name: "ضد آفتاب SPF50",
     description: "کرم ضد آفتاب با SPF50 و PA+++. بدون چربی و مناسب زیر آرایش.",
     price: 520000,
-    image: walletImg,
+    image: sunscreenImg,
     category: "مراقبت پوست",
     rating: 4.8,
     reviews: 298,
