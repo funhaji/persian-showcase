@@ -1,13 +1,37 @@
-import { Link } from "react-router-dom";
-import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft } from "lucide-react";
+import { Link, Navigate } from "react-router-dom";
+import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/shop/Layout";
 import SEO from "@/components/SEO";
 import { useCart } from "@/contexts/CartContext";
-import { formatPrice } from "@/data/products";
+import { useSite } from "@/contexts/SiteContext";
+import { formatPrice } from "@/components/shop/ProductCard";
 
 const Cart = () => {
   const { items, updateQuantity, removeFromCart, totalPrice, clearCart } = useCart();
+  const { purchaseEnabled } = useSite();
+
+  // Redirect if purchase is disabled
+  if (!purchaseEnabled) {
+    return (
+      <Layout>
+        <SEO title="سبد خرید" />
+        <div className="container py-20 text-center">
+          <AlertCircle className="h-16 w-16 mx-auto text-muted-foreground mb-6" />
+          <h1 className="text-2xl font-bold mb-4">خرید در حال حاضر غیرفعال است</h1>
+          <p className="text-muted-foreground mb-8">
+            در حال حاضر فقط امکان مشاهده محصولات وجود دارد.
+          </p>
+          <Link to="/products">
+            <Button size="lg" className="gap-2">
+              مشاهده محصولات
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
+      </Layout>
+    );
+  }
 
   if (items.length === 0) {
     return (
@@ -119,7 +143,7 @@ const Cart = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">هزینه ارسال</span>
-                  <span className="text-success">رایگان</span>
+                  <span className="text-green-500">رایگان</span>
                 </div>
               </div>
               
