@@ -46,8 +46,6 @@ import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import type { Product, Category, Slider, SiteSettings } from "@/types/database";
 import { formatPrice } from "@/components/shop/ProductCard";
 
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASS || "admin1234";
-
 const defaultSettings: SiteSettings = {
   id: '',
   site_name: 'خانومی',
@@ -73,7 +71,25 @@ const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  
+
+  const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASS;
+
+  if (!ADMIN_PASSWORD) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <SEO title="خطای پیکربندی" />
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center text-destructive">
+            <CardTitle className="text-xl">خطای امنیتی</CardTitle>
+            <CardDescription>
+              رمز عبور مدیر (ADMIN_PASS) تنظیم نشده است. لطفا در پنل تنظیمات ورسل آن را اضافه کنید.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
   // Data states
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -201,7 +217,7 @@ const Admin = () => {
     } catch (error: any) {
       toast.error("خطا: " + error.message);
     }
-    setIsLoading(false);
+    setIsLoading(true);
   };
 
   const handleDeleteProduct = async (id: string) => {
@@ -641,89 +657,109 @@ const Admin = () => {
                       </div>
                     </div>
                     <div className="flex gap-6">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center space-x-2 rtl:space-x-reverse">
                         <Switch 
                           checked={productForm.in_stock} 
-                          onCheckedChange={(v) => setProductForm({...productForm, in_stock: v})}
+                          onCheckedChange={(v) => setProductForm({...productForm, in_stock: v})} 
                         />
-                        <Label>موجود</Label>
+                        <Label>موجود در انبار</Label>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center space-x-2 rtl:space-x-reverse">
                         <Switch 
                           checked={productForm.featured} 
-                          onCheckedChange={(v) => setProductForm({...productForm, featured: v})}
+                          onCheckedChange={(v) => setProductForm({...productForm, featured: v})} 
                         />
-                        <Label>ویژه</Label>
+                        <Label>محصول ویژه (نمایش در صفحه اصلی)</Label>
                       </div>
                     </div>
                   </div>
                   <DialogFooter>
+                    <Button variant="outline" onClick={() => setProductDialogOpen(false)}>انصراف</Button>
                     <Button onClick={handleSaveProduct} disabled={isLoading}>
-                      {isLoading ? "در حال ذخیره..." : "ذخیره"}
+                      {isLoading ? "در حال ذخیره..." : "ذخیره محصول"}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
             </div>
 
-            <Card>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
+            <div className="rounded-md border bg-card overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[80px]">تصویر</TableHead>
+                    <TableHead>نام محصول</TableHead>
+                    <TableHead>دسته‌بندی</TableHead>
+                    <TableHead>قیمت</TableHead>
+                    <TableHead>وضعیت</TableHead>
+                    <TableHead className="text-left">عملیات</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {products.length === 0 ? (
                     <TableRow>
-                      <TableHead>محصول</TableHead>
-                      <TableHead>دسته‌بندی</TableHead>
-                      <TableHead>قیمت</TableHead>
-                      <TableHead>وضعیت</TableHead>
-                      <TableHead className="text-left">عملیات</TableHead>
+                      <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
+                        هیچ محصولی یافت نشد
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {products.map((product) => {
-                      const category = categories.find(c => c.id === product.category_id);
-                      return (
-                        <TableRow key={product.id}>
-                          <TableCell>
-                            <div className="flex items-center gap-3">
-                              <img
-                                src={product.image}
-                                alt={product.name}
-                                className="w-12 h-12 rounded-lg object-cover bg-muted"
-                              />
-                              <span className="font-medium">{product.name}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>{category?.name || '-'}</TableCell>
-                          <TableCell>{formatPrice(product.price)}</TableCell>
-                          <TableCell>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${product.in_stock ? 'bg-green-500/20 text-green-600 dark:text-green-400' : 'bg-destructive/20 text-destructive'}`}>
-                              {product.in_stock ? 'موجود' : 'ناموجود'}
+                  ) : (
+                    products.map((product) => (
+                      <TableRow key={product.id}>
+                        <TableCell>
+                          <img 
+                            src={product.image} 
+                            alt={product.name} 
+                            className="w-10 h-10 object-cover rounded"
+                          />
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {product.name}
+                          {product.featured && (
+                            <span className="mr-2 px-1.5 py-0.5 bg-primary/10 text-primary text-[10px] rounded">ویژه</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {categories.find(c => c.id === product.category_id)?.name || 'بدون دسته'}
+                        </TableCell>
+                        <TableCell>{formatPrice(product.price)}</TableCell>
+                        <TableCell>
+                          {product.in_stock ? (
+                            <span className="text-green-600 flex items-center gap-1 text-sm">
+                              <span className="w-1.5 h-1.5 rounded-full bg-green-600"></span>
+                              موجود
                             </span>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="icon" onClick={() => openEditProduct(product)}>
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDeleteProduct(product.id)}>
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                    {products.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                          هیچ محصولی وجود ندارد
+                          ) : (
+                            <span className="text-destructive flex items-center gap-1 text-sm">
+                              <span className="w-1.5 h-1.5 rounded-full bg-destructive"></span>
+                              ناموجود
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-left">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              onClick={() => openEditProduct(product)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="text-destructive hover:text-destructive"
+                              onClick={() => handleDeleteProduct(product.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </TabsContent>
 
           {/* Categories Tab */}
@@ -756,72 +792,80 @@ const Admin = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>شناسه (slug) *</Label>
+                      <Label>نامک (Slug) *</Label>
                       <Input 
                         value={categoryForm.slug} 
                         onChange={(e) => setCategoryForm({...categoryForm, slug: e.target.value})}
-                        placeholder="skincare"
-                        dir="ltr"
+                        placeholder="category-name"
                       />
                     </div>
                     <div className="space-y-2">
                       <Label>ترتیب نمایش</Label>
                       <Input 
-                        type="number"
+                        type="number" 
                         value={categoryForm.order_index} 
                         onChange={(e) => setCategoryForm({...categoryForm, order_index: Number(e.target.value)})}
                       />
                     </div>
                   </div>
                   <DialogFooter>
+                    <Button variant="outline" onClick={() => setCategoryDialogOpen(false)}>انصراف</Button>
                     <Button onClick={handleSaveCategory} disabled={isLoading}>
-                      {isLoading ? "در حال ذخیره..." : "ذخیره"}
+                      {isLoading ? "در حال ذخیره..." : "ذخیره دسته‌بندی"}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
             </div>
 
-            <Card>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
+            <div className="rounded-md border bg-card overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ترتیب</TableHead>
+                    <TableHead>نام دسته‌بندی</TableHead>
+                    <TableHead>نامک (Slug)</TableHead>
+                    <TableHead className="text-left">عملیات</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {categories.length === 0 ? (
                     <TableRow>
-                      <TableHead>نام</TableHead>
-                      <TableHead>شناسه</TableHead>
-                      <TableHead>ترتیب</TableHead>
-                      <TableHead className="text-left">عملیات</TableHead>
+                      <TableCell colSpan={4} className="text-center py-10 text-muted-foreground">
+                        هیچ دسته‌بندی یافت نشد
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {categories.map((category) => (
-                      <TableRow key={category.id}>
-                        <TableCell className="font-medium">{category.name}</TableCell>
-                        <TableCell dir="ltr" className="text-muted-foreground">{category.slug}</TableCell>
-                        <TableCell>{category.order_index}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="icon" onClick={() => openEditCategory(category)}>
+                  ) : (
+                    categories.map((cat) => (
+                      <TableRow key={cat.id}>
+                        <TableCell>{cat.order_index}</TableCell>
+                        <TableCell className="font-medium">{cat.name}</TableCell>
+                        <TableCell>{cat.slug}</TableCell>
+                        <TableCell className="text-left">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              onClick={() => openEditCategory(cat)}
+                            >
                               <Pencil className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDeleteCategory(category.id)}>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="text-destructive hover:text-destructive"
+                              onClick={() => handleDeleteCategory(cat.id)}
+                            >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
                         </TableCell>
                       </TableRow>
-                    ))}
-                    {categories.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-                          هیچ دسته‌بندی وجود ندارد
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </TabsContent>
 
           {/* Sliders Tab */}
@@ -829,7 +873,7 @@ const Admin = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold">اسلایدرها</h2>
-                <p className="text-muted-foreground">{sliders.length} اسلایدر</p>
+                <p className="text-muted-foreground">{sliders.length} اسلاید</p>
               </div>
               <Dialog open={sliderDialogOpen} onOpenChange={(open) => {
                 setSliderDialogOpen(open);
@@ -838,7 +882,7 @@ const Admin = () => {
                 <DialogTrigger asChild>
                   <Button className="gap-2">
                     <Plus className="h-4 w-4" />
-                    افزودن اسلایدر
+                    افزودن اسلاید
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-lg">
@@ -847,14 +891,14 @@ const Admin = () => {
                   </DialogHeader>
                   <div className="grid gap-4 py-4">
                     <div className="space-y-2">
-                      <Label>عنوان *</Label>
+                      <Label>عنوان اسلاید *</Label>
                       <Input 
                         value={sliderForm.title} 
                         onChange={(e) => setSliderForm({...sliderForm, title: e.target.value})}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>زیرعنوان</Label>
+                      <Label>متن زیر عنوان</Label>
                       <Input 
                         value={sliderForm.subtitle} 
                         onChange={(e) => setSliderForm({...sliderForm, subtitle: e.target.value})}
@@ -870,19 +914,18 @@ const Admin = () => {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>لینک دکمه</Label>
-                        <Input 
-                          value={sliderForm.link} 
-                          onChange={(e) => setSliderForm({...sliderForm, link: e.target.value})}
-                          placeholder="/products"
-                        />
-                      </div>
-                      <div className="space-y-2">
                         <Label>متن دکمه</Label>
                         <Input 
                           value={sliderForm.button_text} 
                           onChange={(e) => setSliderForm({...sliderForm, button_text: e.target.value})}
-                          placeholder="مشاهده"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>لینک (URL)</Label>
+                        <Input 
+                          value={sliderForm.link} 
+                          onChange={(e) => setSliderForm({...sliderForm, link: e.target.value})}
+                          placeholder="/products/lipstick"
                         />
                       </div>
                     </div>
@@ -890,252 +933,252 @@ const Admin = () => {
                       <div className="space-y-2">
                         <Label>ترتیب نمایش</Label>
                         <Input 
-                          type="number"
+                          type="number" 
                           value={sliderForm.order_index} 
                           onChange={(e) => setSliderForm({...sliderForm, order_index: Number(e.target.value)})}
                         />
                       </div>
-                      <div className="flex items-center gap-2 pt-6">
+                      <div className="flex items-center space-x-2 rtl:space-x-reverse pt-8">
                         <Switch 
                           checked={sliderForm.is_active} 
-                          onCheckedChange={(v) => setSliderForm({...sliderForm, is_active: v})}
+                          onCheckedChange={(v) => setSliderForm({...sliderForm, is_active: v})} 
                         />
                         <Label>فعال</Label>
                       </div>
                     </div>
                   </div>
                   <DialogFooter>
+                    <Button variant="outline" onClick={() => setSliderDialogOpen(false)}>انصراف</Button>
                     <Button onClick={handleSaveSlider} disabled={isLoading}>
-                      {isLoading ? "در حال ذخیره..." : "ذخیره"}
+                      {isLoading ? "در حال ذخیره..." : "ذخیره اسلایدر"}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {sliders.map((slider) => (
-                <Card key={slider.id} className="overflow-hidden">
-                  <div className="aspect-video relative">
-                    <img 
-                      src={slider.image} 
-                      alt={slider.title}
-                      className="w-full h-full object-cover"
-                    />
-                    {!slider.is_active && (
-                      <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
-                        <span className="text-muted-foreground">غیرفعال</span>
-                      </div>
-                    )}
-                  </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-bold mb-1">{slider.title}</h3>
-                    {slider.subtitle && (
-                      <p className="text-sm text-muted-foreground mb-3">{slider.subtitle}</p>
-                    )}
-                    <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" onClick={() => openEditSlider(slider)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="sm" className="text-destructive" onClick={() => handleDeleteSlider(slider.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {sliders.length === 0 ? (
+                <div className="col-span-full text-center py-10 text-muted-foreground border rounded-md">
+                  هیچ اسلایدی یافت نشد
+                </div>
+              ) : (
+                sliders.map((slider) => (
+                  <Card key={slider.id} className={!slider.is_active ? 'opacity-60' : ''}>
+                    <div className="relative aspect-[21/9] overflow-hidden rounded-t-lg bg-muted">
+                      <img 
+                        src={slider.image} 
+                        alt={slider.title} 
+                        className="w-full h-full object-cover"
+                      />
+                      {!slider.is_active && (
+                        <div className="absolute inset-0 bg-background/50 flex items-center justify-center">
+                          <span className="bg-destructive text-destructive-foreground px-2 py-1 rounded text-sm font-bold">غیرفعال</span>
+                        </div>
+                      )}
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-              {sliders.length === 0 && (
-                <Card className="col-span-full">
-                  <CardContent className="py-8 text-center text-muted-foreground">
-                    هیچ اسلایدری وجود ندارد
-                  </CardContent>
-                </Card>
+                    <CardHeader className="p-4">
+                      <CardTitle className="text-lg">{slider.title}</CardTitle>
+                      <CardDescription>{slider.subtitle}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-4 pt-0 flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">ترتیب: {slider.order_index}</span>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => openEditSlider(slider)}>
+                          <Pencil className="h-4 w-4 mr-1" />
+                          ویرایش
+                        </Button>
+                        <Button variant="outline" size="sm" className="text-destructive" onClick={() => handleDeleteSlider(slider.id)}>
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          حذف
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
               )}
             </div>
           </TabsContent>
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold">تنظیمات سایت</h2>
-                <p className="text-muted-foreground">تنظیمات عمومی فروشگاه</p>
-              </div>
-              <Button onClick={handleSaveSettings} disabled={savingSettings} className="gap-2">
-                <Save className="h-4 w-4" />
-                {savingSettings ? "در حال ذخیره..." : "ذخیره تنظیمات"}
-              </Button>
-            </div>
-
-            <div className="grid gap-6 lg:grid-cols-2">
-              {/* General */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>اطلاعات کلی</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>نام سایت</Label>
-                    <Input 
-                      value={settings.site_name}
-                      onChange={(e) => setSettings({...settings, site_name: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>توضیحات</Label>
-                    <Textarea 
-                      value={settings.site_description}
-                      onChange={(e) => setSettings({...settings, site_description: e.target.value})}
-                      rows={2}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>درباره ما</Label>
-                    <Textarea 
-                      value={settings.about_us || ''}
-                      onChange={(e) => setSettings({...settings, about_us: e.target.value})}
-                      rows={4}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Branding */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>برندینگ</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>لینک لوگو</Label>
-                    <Input 
-                      value={settings.logo_url || ''}
-                      onChange={(e) => setSettings({...settings, logo_url: e.target.value})}
-                      placeholder="https://..."
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>لینک فاویکون</Label>
-                    <Input 
-                      value={settings.favicon_url || ''}
-                      onChange={(e) => setSettings({...settings, favicon_url: e.target.value})}
-                      placeholder="https://..."
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Contact */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>اطلاعات تماس</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>شماره تلفن‌ها (با کاما جدا کنید)</Label>
-                    <Input 
-                      value={settings.phone_numbers.join(', ')}
-                      onChange={(e) => setSettings({...settings, phone_numbers: e.target.value.split(',').map(s => s.trim())})}
-                      dir="ltr"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>آدرس</Label>
-                    <Input 
-                      value={settings.address || ''}
-                      onChange={(e) => setSettings({...settings, address: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>ساعات پشتیبانی</Label>
-                    <Input 
-                      value={settings.support_hours}
-                      onChange={(e) => setSettings({...settings, support_hours: e.target.value})}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Social */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>شبکه‌های اجتماعی</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>اینستاگرام</Label>
-                    <Input 
-                      value={settings.instagram_url || ''}
-                      onChange={(e) => setSettings({...settings, instagram_url: e.target.value})}
-                      dir="ltr"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>تلگرام</Label>
-                    <Input 
-                      value={settings.telegram_url || ''}
-                      onChange={(e) => setSettings({...settings, telegram_url: e.target.value})}
-                      dir="ltr"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>لینکدین</Label>
-                    <Input 
-                      value={settings.linkedin_url || ''}
-                      onChange={(e) => setSettings({...settings, linkedin_url: e.target.value})}
-                      dir="ltr"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Purchase */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>تنظیمات خرید</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between p-4 rounded-lg border">
-                    <div>
-                      <p className="font-medium">امکان خرید</p>
-                      <p className="text-sm text-muted-foreground">
-                        {settings.purchase_enabled 
-                          ? "کاربران می‌توانند خرید کنند" 
-                          : "فقط مشاهده محصولات ممکن است"}
-                      </p>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Main Settings */}
+              <div className="lg:col-span-2 space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>تنظیمات عمومی وب‌سایت</CardTitle>
+                    <CardDescription>نام و توضیحات کلی وب‌سایت خود را تنظیم کنید</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>نام فروشگاه</Label>
+                      <Input 
+                        value={settings.site_name} 
+                        onChange={(e) => setSettings({...settings, site_name: e.target.value})}
+                      />
                     </div>
-                    <Switch 
-                      checked={settings.purchase_enabled}
-                      onCheckedChange={(v) => setSettings({...settings, purchase_enabled: v})}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+                    <div className="space-y-2">
+                      <Label>توضیحات کوتاه سئو</Label>
+                      <Textarea 
+                        value={settings.site_description || ''} 
+                        onChange={(e) => setSettings({...settings, site_description: e.target.value})}
+                        rows={3}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>لینک لوگو</Label>
+                        <Input 
+                          value={settings.logo_url || ''} 
+                          onChange={(e) => setSettings({...settings, logo_url: e.target.value})}
+                          placeholder="https://..."
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>لینک فاوآیکون</Label>
+                        <Input 
+                          value={settings.favicon_url || ''} 
+                          onChange={(e) => setSettings({...settings, favicon_url: e.target.value})}
+                          placeholder="https://..."
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
 
-              {/* Trust Badges */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>نمادهای اعتماد</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>کد اینماد</Label>
-                    <Input 
-                      value={settings.enamad_code || ''}
-                      onChange={(e) => setSettings({...settings, enamad_code: e.target.value})}
-                      dir="ltr"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>کد ساماندهی</Label>
-                    <Input 
-                      value={settings.samandehi_code || ''}
-                      onChange={(e) => setSettings({...settings, samandehi_code: e.target.value})}
-                      dir="ltr"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>درباره ما و اطلاعات تماس</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>متن درباره ما</Label>
+                      <Textarea 
+                        value={settings.about_us || ''} 
+                        onChange={(e) => setSettings({...settings, about_us: e.target.value})}
+                        rows={5}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>نشانی فروشگاه</Label>
+                      <Input 
+                        value={settings.address || ''} 
+                        onChange={(e) => setSettings({...settings, address: e.target.value})}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>ساعات پشتیبانی</Label>
+                        <Input 
+                          value={settings.support_hours || ''} 
+                          onChange={(e) => setSettings({...settings, support_hours: e.target.value})}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>شماره تماس (با کاما جدا کنید)</Label>
+                        <Input 
+                          value={settings.phone_numbers.join(', ')} 
+                          onChange={(e) => setSettings({...settings, phone_numbers: e.target.value.split(',').map(s => s.trim())})}
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>شبکه‌های اجتماعی</CardTitle>
+                  </CardHeader>
+                  <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>اینستاگرام</Label>
+                      <Input 
+                        value={settings.instagram_url || ''} 
+                        onChange={(e) => setSettings({...settings, instagram_url: e.target.value})}
+                        placeholder="https://instagram.com/username"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>تلگرام</Label>
+                      <Input 
+                        value={settings.telegram_url || ''} 
+                        onChange={(e) => setSettings({...settings, telegram_url: e.target.value})}
+                        placeholder="https://t.me/username"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Side Panels */}
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      وضعیت خرید
+                      {settings.purchase_enabled ? (
+                        <ToggleRight className="text-green-600 h-6 w-6" />
+                      ) : (
+                        <ToggleLeft className="text-muted-foreground h-6 w-6" />
+                      )}
+                    </CardTitle>
+                    <CardDescription>فعال یا غیرفعال کردن امکان افزودن به سبد خرید</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="purchase-toggle" className="flex flex-col">
+                        <span>خرید آنلاین</span>
+                        <span className="font-normal text-xs text-muted-foreground">
+                          {settings.purchase_enabled ? 'فعال (کاربران می‌توانند خرید کنند)' : 'غیرفعال (کاتالوگ محصولات)'}
+                        </span>
+                      </Label>
+                      <Switch 
+                        id="purchase-toggle"
+                        checked={settings.purchase_enabled} 
+                        onCheckedChange={(v) => setSettings({...settings, purchase_enabled: v})} 
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>نمادهای اعتماد</CardTitle>
+                    <CardDescription>کد دریافتی از مراجع ذی‌صلاح</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>کد اینماد</Label>
+                      <Textarea 
+                        value={settings.enamad_code || ''} 
+                        onChange={(e) => setSettings({...settings, enamad_code: e.target.value})}
+                        placeholder="کد HTML اینماد..."
+                        className="font-mono text-xs"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>کد ساماندهی</Label>
+                      <Textarea 
+                        value={settings.samandehi_code || ''} 
+                        onChange={(e) => setSettings({...settings, samandehi_code: e.target.value})}
+                        placeholder="کد HTML ساماندهی..."
+                        className="font-mono text-xs"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Button 
+                  className="w-full h-14 text-lg gap-2" 
+                  size="lg"
+                  disabled={savingSettings}
+                  onClick={handleSaveSettings}
+                >
+                  <Save className="h-5 w-5" />
+                  {savingSettings ? "در حال ذخیره..." : "ذخیره تمامی تغییرات"}
+                </Button>
+              </div>
             </div>
           </TabsContent>
         </Tabs>
