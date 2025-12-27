@@ -14,6 +14,7 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Admin from "./pages/Admin";
 import About from "./pages/About";
+import DynamicPage from "./pages/DynamicPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,14 @@ const App = () => (
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/admin" element={<Admin />} />
                   <Route path="/about" element={<About />} />
+                  <Route path="/contact" element={<DynamicPage />} />
+                  <Route path="/faq" element={<DynamicPage />} />
+                  <Route path="/shipping" element={<DynamicPage />} />
+                  <Route path="/returns" element={<DynamicPage />} />
+                  <Route path="/privacy" element={<DynamicPage />} />
+                  <Route path="/terms" element={<DynamicPage />} />
+                  <Route path="/careers" element={<DynamicPage />} />
+                  <Route path="/guide" element={<DynamicPage />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
