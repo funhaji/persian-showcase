@@ -163,6 +163,13 @@ const Admin = () => {
 
   // Fetch data
   useEffect(() => {
+    const savedAuth = localStorage.getItem('admin_authenticated');
+    if (savedAuth === 'true') {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  useEffect(() => {
     if (isAuthenticated && isSupabaseConfigured()) {
       fetchData();
     }
@@ -193,6 +200,7 @@ const Admin = () => {
     setTimeout(() => {
       if (password === ADMIN_PASSWORD) {
         setIsAuthenticated(true);
+        localStorage.setItem('admin_authenticated', 'true');
         toast.success("ورود موفق", { description: "به پنل مدیریت خوش آمدید" });
       } else {
         toast.error("رمز عبور اشتباه است");
@@ -203,6 +211,7 @@ const Admin = () => {
 
   const handleLogout = () => {
     setIsAuthenticated(false);
+    localStorage.removeItem('admin_authenticated');
     setPassword("");
     toast.info("از پنل مدیریت خارج شدید");
   };
