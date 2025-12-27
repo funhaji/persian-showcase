@@ -47,6 +47,12 @@ export interface SiteSettings {
   telegram_url?: string | null;
   linkedin_url?: string | null;
   about_us?: string | null;
+  contact_us?: string | null;
+  faq?: string | null;
+  shipping_policy?: string | null;
+  return_policy?: string | null;
+  privacy_policy?: string | null;
+  terms_conditions?: string | null;
   purchase_enabled: boolean;
   enamad_code?: string | null;
   samandehi_code?: string | null;
