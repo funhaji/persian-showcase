@@ -46,7 +46,7 @@ import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import type { Product, Category, Slider, SiteSettings } from "@/types/database";
 import { formatPrice } from "@/components/shop/ProductCard";
 
-const ADMIN_PASSWORD = "admin1234";
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASS || "admin1234";
 
 const defaultSettings: SiteSettings = {
   id: '',
