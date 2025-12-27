@@ -28,11 +28,19 @@ const Header = () => {
       <div className="container flex h-16 items-center justify-between gap-4">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <span className="text-lg font-bold text-primary-foreground">
-              {settings?.site_name?.charAt(0) || 'ف'}
-            </span>
-          </div>
+          {settings?.logo_url ? (
+            <img 
+              src={settings.logo_url} 
+              alt={settings.site_name} 
+              className="h-9 w-auto object-contain"
+            />
+          ) : (
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+              <span className="text-lg font-bold text-primary-foreground">
+                {settings?.site_name?.charAt(0) || 'ف'}
+              </span>
+            </div>
+          )}
           <span className="text-xl font-bold hidden sm:inline">
             {settings?.site_name || 'فروشگاه'}
           </span>
