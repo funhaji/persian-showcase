@@ -35,19 +35,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
       return;
     }
     
-    addToCart({
-      id: product.id,
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      originalPrice: product.original_price || undefined,
-      image: product.image,
-      category: category?.name || '',
-      rating: product.rating,
-      reviews: product.reviews,
-      inStock: product.in_stock,
-      featured: product.featured,
-    });
+    addToCart(product);
     toast.success(`${product.name} به سبد خرید اضافه شد`);
   };
 

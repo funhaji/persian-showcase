@@ -1,4 +1,4 @@
-import { Link, Navigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/shop/Layout";
@@ -71,13 +71,13 @@ const Cart = () => {
           <div className="lg:col-span-2 space-y-4">
             {items.map((item) => (
               <div
-                key={item.id}
+                key={item.product.id}
                 className="flex gap-4 p-4 rounded-xl border bg-card"
               >
-                <Link to={`/product/${item.id}`} className="shrink-0">
+                <Link to={`/product/${item.product.id}`} className="shrink-0">
                   <img
-                    src={item.image}
-                    alt={item.name}
+                    src={item.product.image}
+                    alt={item.product.name}
                     className="w-24 h-24 object-cover rounded-lg"
                   />
                 </Link>
@@ -85,18 +85,18 @@ const Cart = () => {
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <Link
-                        to={`/product/${item.id}`}
+                        to={`/product/${item.product.id}`}
                         className="font-semibold hover:text-primary transition-colors line-clamp-1"
                       >
-                        {item.name}
+                        {item.product.name}
                       </Link>
-                      <p className="text-sm text-muted-foreground">{item.category}</p>
+                      <p className="text-sm text-muted-foreground">{item.product.category_id}</p>
                     </div>
                     <Button
                       variant="ghost"
                       size="icon"
                       className="shrink-0 text-muted-foreground hover:text-destructive"
-                      onClick={() => removeFromCart(item.id)}
+                      onClick={() => removeFromCart(item.product.id)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -108,7 +108,7 @@ const Cart = () => {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8"
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
                       >
                         <Minus className="h-4 w-4" />
                       </Button>
@@ -117,13 +117,13 @@ const Cart = () => {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8"
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
                       >
                         <Plus className="h-4 w-4" />
                       </Button>
                     </div>
                     <p className="font-bold text-primary">
-                      {formatPrice(item.price * item.quantity)}
+                      {formatPrice(item.product.price * item.quantity)}
                     </p>
                   </div>
                 </div>

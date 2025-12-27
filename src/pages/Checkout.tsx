@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import Layout from "@/components/shop/Layout";
 import SEO from "@/components/SEO";
 import { useCart } from "@/contexts/CartContext";
-import { formatPrice } from "@/data/products";
+import { formatPrice } from "@/components/shop/ProductCard";
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -34,8 +34,8 @@ const Checkout = () => {
         <SEO title="سفارش موفق" />
         <div className="container py-20">
           <div className="max-w-md mx-auto text-center animate-scale-in">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-success/20 flex items-center justify-center">
-              <Check className="h-10 w-10 text-success" />
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-green-500/20 flex items-center justify-center">
+              <Check className="h-10 w-10 text-green-500" />
             </div>
             <h1 className="text-3xl font-bold mb-4">سفارش با موفقیت ثبت شد!</h1>
             <p className="text-muted-foreground mb-8">
@@ -167,19 +167,19 @@ const Checkout = () => {
               
               <div className="space-y-4 max-h-80 overflow-y-auto">
                 {items.map((item) => (
-                  <div key={item.id} className="flex gap-3">
+                  <div key={item.product.id} className="flex gap-3">
                     <img
-                      src={item.image}
-                      alt={item.name}
+                      src={item.product.image}
+                      alt={item.product.name}
                       className="w-16 h-16 object-cover rounded-lg"
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium line-clamp-1">{item.name}</p>
+                      <p className="font-medium line-clamp-1">{item.product.name}</p>
                       <p className="text-sm text-muted-foreground">
                         {item.quantity} عدد
                       </p>
                       <p className="text-sm font-medium text-primary">
-                        {formatPrice(item.price * item.quantity)}
+                        {formatPrice(item.product.price * item.quantity)}
                       </p>
                     </div>
                   </div>
@@ -193,7 +193,7 @@ const Checkout = () => {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">هزینه ارسال</span>
-                  <span className="text-success">رایگان</span>
+                  <span className="text-green-500">رایگان</span>
                 </div>
                 <div className="flex justify-between text-lg font-bold pt-2 border-t">
                   <span>مجموع</span>
