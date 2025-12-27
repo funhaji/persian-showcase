@@ -1165,6 +1165,60 @@ const Admin = () => {
                       />
                     </div>
                     <div className="space-y-2">
+                      <Label>تماس با ما</Label>
+                      <Textarea 
+                        value={settings.contact_us || ''} 
+                        onChange={(e) => setSettings({...settings, contact_us: e.target.value})}
+                        rows={5}
+                        placeholder="اطلاعات تماس خود را اینجا وارد کنید..."
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>پرسش‌های متداول (FAQ)</Label>
+                      <Textarea 
+                        value={settings.faq || ''} 
+                        onChange={(e) => setSettings({...settings, faq: e.target.value})}
+                        rows={5}
+                        placeholder="سوالات متداول را اینجا وارد کنید..."
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>رویه‌های ارسال</Label>
+                      <Textarea 
+                        value={settings.shipping_policy || ''} 
+                        onChange={(e) => setSettings({...settings, shipping_policy: e.target.value})}
+                        rows={5}
+                        placeholder="رویه‌های ارسال را اینجا وارد کنید..."
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>شرایط مرجوعی</Label>
+                      <Textarea 
+                        value={settings.return_policy || ''} 
+                        onChange={(e) => setSettings({...settings, return_policy: e.target.value})}
+                        rows={5}
+                        placeholder="شرایط مرجوعی را اینجا وارد کنید..."
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>حریم خصوصی</Label>
+                      <Textarea 
+                        value={settings.privacy_policy || ''} 
+                        onChange={(e) => setSettings({...settings, privacy_policy: e.target.value})}
+                        rows={5}
+                        placeholder="سیاست حریم خصوصی را اینجا وارد کنید..."
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>قوانین و مقررات</Label>
+                      <Textarea 
+                        value={settings.terms_conditions || ''} 
+                        onChange={(e) => setSettings({...settings, terms_conditions: e.target.value})}
+                        rows={5}
+                        placeholder="قوانین و مقررات سایت را اینجا وارد کنید..."
+                      />
+                    </div>
+                    <div className="space-y-2">
                       <Label>نشانی فروشگاه</Label>
                       <Input 
                         value={settings.address || ''} 
