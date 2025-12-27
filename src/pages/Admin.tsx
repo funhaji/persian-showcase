@@ -42,7 +42,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import SEO from "@/components/SEO";
 import { toast } from "sonner";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, uploadImage } from "@/lib/supabase";
 import type { Product, Category, Slider, SiteSettings } from "@/types/database";
 import { formatPrice } from "@/components/shop/ProductCard";
 
@@ -71,6 +71,7 @@ const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASS;
 
@@ -135,6 +136,30 @@ const Admin = () => {
   });
 
   const [savingSettings, setSavingSettings] = useState(false);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'product' | 'slider' | 'settings_logo' | 'settings_favicon') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const url = await uploadImage(file);
+      if (type === 'product') {
+        setProductForm({ ...productForm, image: url });
+      } else if (type === 'slider') {
+        setSliderForm({ ...sliderForm, image: url });
+      } else if (type === 'settings_logo') {
+        setSettings({ ...settings, logo_url: url });
+      } else if (type === 'settings_favicon') {
+        setSettings({ ...settings, favicon_url: url });
+      }
+      toast.success("تصویر با موفقیت بارگذاری شد");
+    } catch (error: any) {
+      toast.error("خطا در بارگذاری تصویر: " + error.message);
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   // Fetch data
   useEffect(() => {
@@ -629,11 +654,26 @@ const Admin = () => {
                     </div>
                     <div className="space-y-2">
                       <Label>لینک تصویر</Label>
-                      <Input 
-                        value={productForm.image} 
-                        onChange={(e) => setProductForm({...productForm, image: e.target.value})}
-                        placeholder="https://..."
-                      />
+                      <div className="flex gap-2">
+                        <Input 
+                          value={productForm.image} 
+                          onChange={(e) => setProductForm({...productForm, image: e.target.value})}
+                          placeholder="https://..."
+                          className="flex-1"
+                        />
+                        <div className="relative">
+                          <Button variant="outline" type="button" disabled={isUploading} className="gap-2">
+                            <Upload className="h-4 w-4" />
+                            {isUploading ? "..." : "آپلود"}
+                          </Button>
+                          <input 
+                            type="file" 
+                            className="absolute inset-0 opacity-0 cursor-pointer" 
+                            accept="image/*"
+                            onChange={(e) => handleImageUpload(e, 'product')}
+                          />
+                        </div>
+                      </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
@@ -906,11 +946,26 @@ const Admin = () => {
                     </div>
                     <div className="space-y-2">
                       <Label>لینک تصویر *</Label>
-                      <Input 
-                        value={sliderForm.image} 
-                        onChange={(e) => setSliderForm({...sliderForm, image: e.target.value})}
-                        placeholder="https://..."
-                      />
+                      <div className="flex gap-2">
+                        <Input 
+                          value={sliderForm.image} 
+                          onChange={(e) => setSliderForm({...sliderForm, image: e.target.value})}
+                          placeholder="https://..."
+                          className="flex-1"
+                        />
+                        <div className="relative">
+                          <Button variant="outline" type="button" disabled={isUploading} className="gap-2">
+                            <Upload className="h-4 w-4" />
+                            {isUploading ? "..." : "آپلود"}
+                          </Button>
+                          <input 
+                            type="file" 
+                            className="absolute inset-0 opacity-0 cursor-pointer" 
+                            accept="image/*"
+                            onChange={(e) => handleImageUpload(e, 'slider')}
+                          />
+                        </div>
+                      </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
@@ -1029,19 +1084,47 @@ const Admin = () => {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>لینک لوگو</Label>
-                        <Input 
-                          value={settings.logo_url || ''} 
-                          onChange={(e) => setSettings({...settings, logo_url: e.target.value})}
-                          placeholder="https://..."
-                        />
+                        <div className="flex gap-2">
+                          <Input 
+                            value={settings.logo_url || ''} 
+                            onChange={(e) => setSettings({...settings, logo_url: e.target.value})}
+                            placeholder="https://..."
+                            className="flex-1"
+                          />
+                          <div className="relative">
+                            <Button variant="outline" size="sm" type="button" disabled={isUploading}>
+                              <Upload className="h-4 w-4" />
+                            </Button>
+                            <input 
+                              type="file" 
+                              className="absolute inset-0 opacity-0 cursor-pointer" 
+                              accept="image/*"
+                              onChange={(e) => handleImageUpload(e, 'settings_logo')}
+                            />
+                          </div>
+                        </div>
                       </div>
                       <div className="space-y-2">
                         <Label>لینک فاوآیکون</Label>
-                        <Input 
-                          value={settings.favicon_url || ''} 
-                          onChange={(e) => setSettings({...settings, favicon_url: e.target.value})}
-                          placeholder="https://..."
-                        />
+                        <div className="flex gap-2">
+                          <Input 
+                            value={settings.favicon_url || ''} 
+                            onChange={(e) => setSettings({...settings, favicon_url: e.target.value})}
+                            placeholder="https://..."
+                            className="flex-1"
+                          />
+                          <div className="relative">
+                            <Button variant="outline" size="sm" type="button" disabled={isUploading}>
+                              <Upload className="h-4 w-4" />
+                            </Button>
+                            <input 
+                              type="file" 
+                              className="absolute inset-0 opacity-0 cursor-pointer" 
+                              accept="image/*"
+                              onChange={(e) => handleImageUpload(e, 'settings_favicon')}
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
