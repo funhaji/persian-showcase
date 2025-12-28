@@ -120,8 +120,8 @@ const Footer = () => {
                 <div className="text-sm text-zinc-400 line-clamp-3 mb-2">
                   {settings.article_content.replace(/<[^>]*>/g, '')}
                 </div>
-                <Link to="/article" className="text-primary text-sm hover:underline">
-                  مشاهده کامل مقاله
+                <Link to="/articles" className="text-primary text-sm hover:underline">
+                  مشاهده مقالات
                 </Link>
               </div>
             )}
