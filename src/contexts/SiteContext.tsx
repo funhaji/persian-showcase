@@ -15,10 +15,10 @@ interface SiteContextType {
 
 const defaultSettings: SiteSettings = {
   id: 'default',
-  site_name: 'خانومی',
-  site_description: 'فروشگاه آنلاین لوازم آرایشی و بهداشتی',
-  phone_numbers: ['021-91200500', '021-92005221'],
-  support_hours: 'هفت روز هفته، از ساعت ۸ الی ۲۴',
+  site_name: '',
+  site_description: '',
+  phone_numbers: [],
+  support_hours: '',
   purchase_enabled: false,
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
