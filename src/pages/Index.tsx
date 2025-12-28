@@ -56,7 +56,7 @@ const Index = () => {
           />
           <div className="relative z-20 h-full flex flex-col justify-center p-10 md:p-16 text-white max-w-xl space-y-4">
             <span className="bg-[#ffeb3b] text-black text-[11px] font-black px-4 py-1 rounded-full w-fit shadow-lg uppercase tracking-widest">۳۰٪ تخفیف ویژه</span>
-            <h3 className="text-4xl md:text-5xl font-black leading-tight tracking-tighter">پرطرفدارهای برقی اینجاست!</h3>
+            <h3 className="text-4xl md:text-5xl font-black leading-tight tracking-tighter">تخفیف خورده ها</h3>
             <p className="text-white/70 text-sm md:text-base font-medium max-w-sm">بهترین ابزارهای زیبایی و مراقبت از پوست با قیمت استثنایی</p>
             <Link to="/products" className="pt-2">
               <Button size="lg" className="bg-white text-black hover:bg-[#e91e63] hover:text-white rounded-full font-black px-10 shadow-xl transition-all duration-300">
@@ -126,29 +126,7 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Newsletter Section */}
-        <section className="py-16 bg-gradient-to-r from-[#e91e63] to-[#f50057] rounded-[2.5rem] overflow-hidden relative shadow-2xl">
-          <div className="absolute top-0 left-0 w-96 h-96 bg-white/5 rounded-full -ml-48 -mt-48 blur-3xl" />
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full -mr-48 -mb-48 blur-3xl" />
-          <div className="relative z-10 container text-center space-y-6">
-            <div className="space-y-2">
-              <h3 className="text-3xl md:text-4xl font-black text-white">عضویت در خبرنامه</h3>
-              <p className="text-white/80 text-sm md:text-base max-w-xl mx-auto">
-                از جدیدترین محصولات و تخفیف‌های ویژه با خبر شوید
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-              <input 
-                type="email" 
-                placeholder="ایمیل خود را وارد کنید"
-                className="flex-1 px-6 py-4 rounded-full border-none text-right bg-white/20 backdrop-blur-sm text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/40"
-              />
-              <Button className="bg-white text-[#e91e63] hover:bg-white/90 rounded-full px-8 py-4 font-bold shadow-lg">
-                عضویت
-              </Button>
-            </div>
-          </div>
-        </section>
+        {/* Newsletter removed as requested */}
       </div>
     </Layout>
   );
