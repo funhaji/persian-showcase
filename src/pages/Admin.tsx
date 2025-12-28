@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { 
   Plus, Pencil, Trash2, Package, Lock, LogOut, 
   Settings, Image, Layers, LayoutGrid, Save, 
-  ToggleLeft, ToggleRight, Upload, X, RefreshCw
+  ToggleLeft, ToggleRight, Upload, X, RefreshCw, FileText, HelpCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -96,14 +96,21 @@ const Admin = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [sliders, setSliders] = useState<Slider[]>([]);
   const [settings, setSettings] = useState<SiteSettings>(defaultSettings);
+  // Articles & FAQs
+  const [articles, setArticles] = useState<Array<{id: string; title: string; slug?: string | null; content: string; excerpt?: string | null;}>>([]);
+  const [faqs, setFaqs] = useState<Array<{id: string; question: string; answer: string; order_index: number; is_active: boolean;}>>([]);
   
   // Dialog states
   const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [sliderDialogOpen, setSliderDialogOpen] = useState(false);
+  const [articleDialogOpen, setArticleDialogOpen] = useState(false);
+  const [faqDialogOpen, setFaqDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [editingSlider, setEditingSlider] = useState<Slider | null>(null);
+  const [editingArticle, setEditingArticle] = useState<any | null>(null);
+  const [editingFaq, setEditingFaq] = useState<any | null>(null);
   
   // Form states
   const [productForm, setProductForm] = useState({
@@ -133,6 +140,21 @@ const Admin = () => {
     button_text: '',
     is_active: true,
     order_index: 0,
+  });
+
+  const [articleForm, setArticleForm] = useState({
+    title: '',
+    slug: '',
+    content: '',
+    excerpt: '',
+    published: true,
+  });
+
+  const [faqForm, setFaqForm] = useState({
+    question: '',
+    answer: '',
+    order_index: 0,
+    is_active: true,
   });
 
   const [savingSettings, setSavingSettings] = useState(false);
@@ -177,17 +199,21 @@ const Admin = () => {
 
   const fetchData = async () => {
     try {
-      const [productsRes, categoriesRes, slidersRes, settingsRes] = await Promise.all([
+      const [productsRes, categoriesRes, slidersRes, settingsRes, articlesRes, faqsRes] = await Promise.all([
         supabase.from('products').select('*').order('created_at', { ascending: false }),
         supabase.from('categories').select('*').order('order_index'),
         supabase.from('sliders').select('*').order('order_index'),
         supabase.from('site_settings').select('*').limit(1).maybeSingle(),
+        supabase.from('articles').select('*').order('created_at', { ascending: false }),
+        supabase.from('faqs').select('*').order('order_index'),
       ]);
       
       if (productsRes.data) setProducts(productsRes.data);
       if (categoriesRes.data) setCategories(categoriesRes.data);
       if (slidersRes.data) setSliders(slidersRes.data);
       if (settingsRes.data) setSettings(settingsRes.data);
+      if (articlesRes.data) setArticles(articlesRes.data);
+      if (faqsRes.data) setFaqs(faqsRes.data);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -450,6 +476,112 @@ const Admin = () => {
     setSliderDialogOpen(true);
   };
 
+  // Articles CRUD
+  const resetArticleForm = () => {
+    setArticleForm({ title: '', slug: '', content: '', excerpt: '', published: true });
+    setEditingArticle(null);
+  };
+
+  const openEditArticle = (article: any) => {
+    setEditingArticle(article);
+    setArticleForm({
+      title: article.title,
+      slug: article.slug || '',
+      content: article.content || '',
+      excerpt: article.excerpt || '',
+      published: article.published ?? true,
+    });
+    setArticleDialogOpen(true);
+  };
+
+  const handleSaveArticle = async () => {
+    if (!articleForm.title || !articleForm.content) {
+      toast.error("لطفا عنوان و محتوا را وارد کنید");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      if (editingArticle) {
+        const { error } = await supabase.from('articles').update({
+          ...articleForm,
+        }).eq('id', editingArticle.id);
+        if (error) throw error;
+        toast.success("مقاله با موفقیت ویرایش شد");
+      } else {
+        const { error } = await supabase.from('articles').insert([articleForm]);
+        if (error) throw error;
+        toast.success("مقاله با موفقیت اضافه شد");
+      }
+      setArticleDialogOpen(false);
+      resetArticleForm();
+      fetchData();
+    } catch (error: any) {
+      toast.error("خطا: " + error.message);
+    }
+    setIsLoading(false);
+  };
+
+  const handleDeleteArticle = async (id: string) => {
+    if (!confirm("آیا از حذف این مقاله مطمئن هستید؟")) return;
+    try {
+      const { error } = await supabase.from('articles').delete().eq('id', id);
+      if (error) throw error;
+      toast.success("مقاله حذف شد");
+      fetchData();
+    } catch (error: any) {
+      toast.error("خطا: " + error.message);
+    }
+  };
+
+  // FAQ CRUD
+  const resetFaqForm = () => {
+    setFaqForm({ question: '', answer: '', order_index: 0, is_active: true });
+    setEditingFaq(null);
+  };
+
+  const openEditFaq = (faq: any) => {
+    setEditingFaq(faq);
+    setFaqForm({ question: faq.question, answer: faq.answer, order_index: faq.order_index, is_active: faq.is_active });
+    setFaqDialogOpen(true);
+  };
+
+  const handleSaveFaq = async () => {
+    if (!faqForm.question || !faqForm.answer) {
+      toast.error("لطفا سوال و پاسخ را وارد کنید");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      if (editingFaq) {
+        const { error } = await supabase.from('faqs').update({ ...faqForm }).eq('id', editingFaq.id);
+        if (error) throw error;
+        toast.success("FAQ با موفقیت ویرایش شد");
+      } else {
+        const { error } = await supabase.from('faqs').insert([faqForm]);
+        if (error) throw error;
+        toast.success("FAQ با موفقیت اضافه شد");
+      }
+      setFaqDialogOpen(false);
+      resetFaqForm();
+      fetchData();
+    } catch (error: any) {
+      toast.error("خطا: " + error.message);
+    }
+    setIsLoading(false);
+  };
+
+  const handleDeleteFaq = async (id: string) => {
+    if (!confirm("آیا از حذف این آیتم FAQ مطمئن هستید؟")) return;
+    try {
+      const { error } = await supabase.from('faqs').delete().eq('id', id);
+      if (error) throw error;
+      toast.success("FAQ حذف شد");
+      fetchData();
+    } catch (error: any) {
+      toast.error("خطا: " + error.message);
+    }
+  };
+
   // Settings
   const handleSaveSettings = async () => {
     setSavingSettings(true);
@@ -599,7 +731,7 @@ const Admin = () => {
 
       <main className="container py-8">
         <Tabs defaultValue="products" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-grid">
             <TabsTrigger value="products" className="gap-2">
               <Package className="h-4 w-4" />
               <span className="hidden sm:inline">محصولات <span className="ml-2 text-sm text-muted-foreground">({products.length})</span></span>
@@ -611,6 +743,14 @@ const Admin = () => {
             <TabsTrigger value="sliders" className="gap-2">
               <Image className="h-4 w-4" />
               <span className="hidden sm:inline">اسلایدرها <span className="ml-2 text-sm text-muted-foreground">({sliders.length})</span></span>
+            </TabsTrigger>
+            <TabsTrigger value="articles" className="gap-2">
+              <FileText className="h-4 w-4" />
+              <span className="hidden sm:inline">مقالات <span className="ml-2 text-sm text-muted-foreground">({articles.length})</span></span>
+            </TabsTrigger>
+            <TabsTrigger value="faqs" className="gap-2">
+              <HelpCircle className="h-4 w-4" />
+              <span className="hidden sm:inline">پرسش‌ها <span className="ml-2 text-sm text-muted-foreground">({faqs.length})</span></span>
             </TabsTrigger>
             <TabsTrigger value="settings" className="gap-2">
               <Settings className="h-4 w-4" />
@@ -1091,6 +1231,181 @@ const Admin = () => {
                   </Card>
                 ))
               )}
+            </div>
+          </TabsContent>
+
+          {/* Articles Tab */}
+          <TabsContent value="articles" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold">مقالات</h2>
+                <p className="text-muted-foreground">{articles.length} مقاله</p>
+              </div>
+              <Dialog open={articleDialogOpen} onOpenChange={(open) => {
+                setArticleDialogOpen(open);
+                if (!open) resetArticleForm();
+              }}>
+                <DialogTrigger asChild>
+                  <Button className="gap-2">
+                    <Plus className="h-4 w-4" />
+                    افزودن مقاله
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>{editingArticle ? 'ویرایش مقاله' : 'افزودن مقاله جدید'}</DialogTitle>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="space-y-2">
+                      <Label>عنوان *</Label>
+                      <Input value={articleForm.title} onChange={(e) => setArticleForm({...articleForm, title: e.target.value})} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>نامک (slug)</Label>
+                      <Input value={articleForm.slug} onChange={(e) => setArticleForm({...articleForm, slug: e.target.value})} placeholder="article-slug" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>خلاصه (اختیاری)</Label>
+                      <Input value={articleForm.excerpt} onChange={(e) => setArticleForm({...articleForm, excerpt: e.target.value})} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>محتوا *</Label>
+                      <Textarea value={articleForm.content} onChange={(e) => setArticleForm({...articleForm, content: e.target.value})} rows={8} />
+                    </div>
+                    <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                      <Switch checked={articleForm.published} onCheckedChange={(v) => setArticleForm({...articleForm, published: v})} />
+                      <Label>منتشر شده</Label>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setArticleDialogOpen(false)}>انصراف</Button>
+                    <Button onClick={handleSaveArticle} disabled={isLoading}>{isLoading ? 'در حال ذخیره...' : 'ذخیره مقاله'}</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <div className="rounded-md border bg-card overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>عنوان</TableHead>
+                    <TableHead>نامک</TableHead>
+                    <TableHead>وضعیت</TableHead>
+                    <TableHead className="text-left">عملیات</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {articles.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center py-10 text-muted-foreground">هیچ مقاله‌ای یافت نشد</TableCell>
+                    </TableRow>
+                  ) : (
+                    articles.map((a) => (
+                      <TableRow key={a.id}>
+                        <TableCell className="font-medium">{a.title}</TableCell>
+                        <TableCell>{a.slug || a.id}</TableCell>
+                        <TableCell>{/* show published */}{a.published ? <span className="text-green-600">منتشر شده</span> : <span className="text-muted-foreground">پیش‌نویس</span>}</TableCell>
+                        <TableCell className="text-left">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button variant="ghost" size="icon" onClick={() => openEditArticle(a)}>
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDeleteArticle(a.id)}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </TabsContent>
+
+          {/* FAQs Tab */}
+          <TabsContent value="faqs" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold">پرسش‌ها (FAQ)</h2>
+                <p className="text-muted-foreground">{faqs.length} آیتم</p>
+              </div>
+              <Dialog open={faqDialogOpen} onOpenChange={(open) => { setFaqDialogOpen(open); if (!open) resetFaqForm(); }}>
+                <DialogTrigger asChild>
+                  <Button className="gap-2">
+                    <Plus className="h-4 w-4" />
+                    افزودن FAQ
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>{editingFaq ? 'ویرایش FAQ' : 'افزودن FAQ جدید'}</DialogTitle>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="space-y-2">
+                      <Label>سوال *</Label>
+                      <Input value={faqForm.question} onChange={(e) => setFaqForm({...faqForm, question: e.target.value})} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>پاسخ *</Label>
+                      <Textarea value={faqForm.answer} onChange={(e) => setFaqForm({...faqForm, answer: e.target.value})} rows={5} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>ترتیب نمایش</Label>
+                        <Input type="number" value={faqForm.order_index} onChange={(e) => setFaqForm({...faqForm, order_index: Number(e.target.value)})} />
+                      </div>
+                      <div className="flex items-center space-x-2 rtl:space-x-reverse pt-8">
+                        <Switch checked={faqForm.is_active} onCheckedChange={(v) => setFaqForm({...faqForm, is_active: v})} />
+                        <Label>فعال</Label>
+                      </div>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setFaqDialogOpen(false)}>انصراف</Button>
+                    <Button onClick={handleSaveFaq} disabled={isLoading}>{isLoading ? 'در حال ذخیره...' : 'ذخیره FAQ'}</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <div className="rounded-md border bg-card overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>سوال</TableHead>
+                    <TableHead>ترتیب</TableHead>
+                    <TableHead>وضعیت</TableHead>
+                    <TableHead className="text-left">عملیات</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {faqs.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center py-10 text-muted-foreground">هیچ FAQ‌ای یافت نشد</TableCell>
+                    </TableRow>
+                  ) : (
+                    faqs.map((f) => (
+                      <TableRow key={f.id}>
+                        <TableCell className="font-medium">{f.question}</TableCell>
+                        <TableCell>{f.order_index}</TableCell>
+                        <TableCell>{f.is_active ? <span className="text-green-600">فعال</span> : <span className="text-muted-foreground">غیرفعال</span>}</TableCell>
+                        <TableCell className="text-left">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button variant="ghost" size="icon" onClick={() => openEditFaq(f)}>
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDeleteFaq(f.id)}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
             </div>
           </TabsContent>
 
