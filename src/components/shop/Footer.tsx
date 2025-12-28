@@ -56,6 +56,11 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
+                <Link to="/articles" className="hover:text-primary transition-colors">
+                  مقاله
+                </Link>
+              </li>
+              <li>
                 <Link to="/careers" className="hover:text-primary transition-colors">
                   فرصت‌های شغلی
                 </Link>
