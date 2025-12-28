@@ -12,7 +12,14 @@ const Articles = () => {
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await supabase.from('articles').select('id,title,slug,excerpt,created_at').order('created_at', { ascending: false });
+        const res = await supabase.from('articles').select('id,title,slug,excerpt,created_at').order('created_at', { ascending: false });
+        if (res.error) throw res.error;
+        let data = res.data as Article[] | null;
+        if ((!data || data.length === 0) && !res.error) {
+          // fallback: singular table name
+          const alt = await supabase.from('article').select('id,title,slug,excerpt,created_at').order('created_at', { ascending: false });
+          if (!alt.error && alt.data) data = alt.data as any;
+        }
         setArticles((data as Article[]) || []);
       } catch (err) {
         console.error('Error fetching articles', err);
