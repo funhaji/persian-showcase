@@ -108,6 +108,19 @@ const Footer = () => {
                 </a>
               )}
             </div>
+            
+            {settings.article_content && (
+              <div className="mb-6">
+                <h3 className="font-bold text-white mb-3 text-lg">مقالات و مطالب</h3>
+                <div className="text-sm text-zinc-400 line-clamp-3 mb-2">
+                  {settings.article_content.replace(/<[^>]*>/g, '')}
+                </div>
+                <Link to="/article" className="text-primary text-sm hover:underline">
+                  مشاهده کامل مقاله
+                </Link>
+              </div>
+            )}
+
             <p className="text-sm mb-4">ما را در شبکه‌های اجتماعی دنبال کنید!</p>
 
             {/* Support Info */}
