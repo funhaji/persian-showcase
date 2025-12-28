@@ -14,13 +14,25 @@ const ArticleDetail = () => {
     (async () => {
       if (!slug) return;
       try {
-        const { data } = await supabase
+        const res = await supabase
           .from('articles')
           .select('*')
           .or(`slug.eq.${slug},id.eq.${slug}`)
           .limit(1)
           .maybeSingle();
-        setArticle(data as Article || null);
+        if (res.error) throw res.error;
+        let data = res.data as Article | null;
+        if (!data) {
+          // fallback to singular table name
+          const alt = await supabase
+            .from('article')
+            .select('*')
+            .or(`slug.eq.${slug},id.eq.${slug}`)
+            .limit(1)
+            .maybeSingle();
+          if (!alt.error) data = alt.data as Article | null;
+        }
+        setArticle(data || null);
       } catch (err) {
         console.error('Error fetching article', err);
       }
