@@ -11,7 +11,6 @@ const Index = () => {
   const { products, categories, isLoading, settings } = useSite();
   
   const featuredProducts = products.filter((p) => p.featured);
-  const discountedProducts = products.filter((p) => p.original_price && p.original_price > p.price);
 
   return (
     <Layout>
@@ -20,176 +19,142 @@ const Index = () => {
         description={settings?.site_description}
       />
       
-      {/* Hero Slider */}
-      <HeroSlider />
+      {/* Top Banner/Promo */}
+      <div className="bg-[#e91e63] py-2 text-center overflow-hidden">
+        <div className="container">
+          <p className="text-white text-xs md:text-sm font-bold animate-pulse tracking-wide">
+            بزن بریم خرید - اینجا کلیک کن
+          </p>
+        </div>
+      </div>
 
-      {/* Categories */}
-      {categories.length > 0 && (
-        <section className="py-20">
-          <div className="container">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-extrabold mb-4">دسته‌بندی‌های محبوب</h2>
-              <div className="h-1 w-20 bg-primary mx-auto rounded-full"></div>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+      <div className="container pt-6 pb-20 space-y-12">
+        {/* Hero Slider */}
+        <div className="rounded-3xl overflow-hidden shadow-2xl border-none">
+          <HeroSlider />
+        </div>
+
+        {/* Categories Grid (Attached Image Style) */}
+        {categories.length > 0 && (
+          <section className="py-4">
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-4 md:gap-8 max-w-5xl mx-auto">
               {categories.map((category) => (
                 <Link
                   key={category.id}
                   to={`/products?category=${encodeURIComponent(category.id)}`}
-                  className="group flex flex-col items-center"
+                  className="group flex flex-col items-center space-y-3"
                 >
-                  <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-2 border-muted bg-card flex items-center justify-center mb-4 group-hover:border-primary group-hover:shadow-md transition-all duration-300 overflow-hidden">
-                    <span className="text-lg font-bold text-muted-foreground group-hover:text-primary transition-colors px-2 text-center">
+                  <div className="w-16 h-16 md:w-24 md:h-24 rounded-full border-2 border-muted bg-white shadow-sm flex items-center justify-center group-hover:border-primary group-hover:scale-110 group-hover:shadow-md transition-all duration-500 overflow-hidden p-2">
+                    <span className="text-[10px] md:text-xs font-black text-center leading-tight text-zinc-700 group-hover:text-primary transition-colors">
                       {category.name}
                     </span>
                   </div>
-                  <h3 className="font-semibold text-center group-hover:text-primary transition-colors">
+                  <span className="text-[10px] md:text-xs font-bold text-zinc-500 group-hover:text-primary tracking-tight">
                     {category.name}
-                  </h3>
+                  </span>
                 </Link>
               ))}
             </div>
+          </section>
+        )}
+
+        {/* Specialized Section (Attached Image Style - Magenta Box) */}
+        <section className="bg-[#e91e63] rounded-[2.5rem] overflow-hidden p-6 md:p-10 flex flex-col md:flex-row gap-8 shadow-2xl relative">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32 blur-3xl" />
+          <div className="flex-1 z-10">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+              {products.filter(p => p.featured).slice(0, 4).map(product => (
+                <div key={product.id} className="bg-white rounded-3xl p-4 flex flex-col items-center group relative shadow-xl hover:-translate-y-2 transition-transform duration-300">
+                   <div className="w-full aspect-square bg-zinc-50 rounded-2xl mb-3 flex items-center justify-center overflow-hidden">
+                     <img src={product.image} className="w-28 h-28 object-contain group-hover:scale-110 transition-transform duration-500" />
+                   </div>
+                   <h4 className="text-[11px] font-bold text-zinc-800 line-clamp-2 text-center mb-2 h-8">{product.name}</h4>
+                   <div className="mt-auto flex flex-col items-center">
+                     <p className="text-[#e91e63] text-sm font-black">{product.price.toLocaleString("fa-IR")} تومان</p>
+                   </div>
+                   <Link to={`/product/${product.id}`} className="absolute inset-0" />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="md:w-60 flex flex-col items-center justify-center text-white text-center space-y-6 z-10">
+            <div className="w-28 h-28 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center shadow-inner">
+              <span className="text-5xl animate-bounce">🎁</span>
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-3xl font-black tracking-tighter">جعبه صورتی</h3>
+              <p className="text-white/80 text-xs font-medium">پیشنهادات شگفت‌انگیز امروز</p>
+            </div>
+            <Link to="/products">
+              <Button variant="outline" className="bg-white/10 border-white/40 text-white hover:bg-white hover:text-[#e91e63] rounded-full px-8 py-6 text-sm font-bold backdrop-blur-sm transition-all duration-300 shadow-lg">
+                مشاهده محصولات
+              </Button>
+            </Link>
           </div>
         </section>
-      )}
 
-      {/* Featured Products */}
-      {featuredProducts.length > 0 && (
-        <section className="py-20 bg-muted/30">
-          <div className="container">
-            <div className="flex flex-col md:flex-row items-center justify-between mb-12 gap-4">
-              <div>
-                <h2 className="text-3xl font-extrabold mb-2">محصولات ویژه</h2>
-                <p className="text-muted-foreground">گلچینی از بهترین و پرفروش‌ترین محصولات ما</p>
-              </div>
-              <Link to="/products">
-                <Button variant="outline" className="rounded-full px-6">
-                  مشاهده همه محصولات
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                </Button>
-              </Link>
+        {/* Secondary Banner (Attached Image Style) */}
+        <section className="relative rounded-[2.5rem] overflow-hidden h-64 md:h-80 border-none group shadow-2xl">
+          <div className="absolute inset-0 bg-gradient-to-r from-zinc-900/80 via-zinc-900/40 to-transparent z-10" />
+          <img 
+            src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&q=80" 
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" 
+          />
+          <div className="relative z-20 h-full flex flex-col justify-center p-10 md:p-16 text-white max-w-xl space-y-4">
+            <span className="bg-[#ffeb3b] text-black text-[11px] font-black px-4 py-1 rounded-full w-fit shadow-lg uppercase tracking-widest">٪۳۰ تخفیف ویژه</span>
+            <h3 className="text-4xl md:text-5xl font-black leading-tight tracking-tighter">پرطرفدارهای برقی اینجاست!</h3>
+            <p className="text-white/70 text-sm md:text-base font-medium max-w-sm">بهترین ابزارهای زیبایی و مراقبت از پوست با قیمت استثنایی</p>
+            <Link to="/products" className="pt-2">
+              <Button size="lg" className="bg-white text-black hover:bg-[#e91e63] hover:text-white rounded-full font-black px-10 shadow-xl transition-all duration-300">
+                مشاهده و خرید
+              </Button>
+            </Link>
+          </div>
+        </section>
+
+        {/* Latest Products Section */}
+        <section className="pt-8">
+          <div className="flex items-center justify-between mb-10 border-b border-muted pb-6">
+            <div className="space-y-1">
+              <h2 className="text-3xl font-black text-zinc-900">جدیدترین محصولات</h2>
+              <div className="h-1.5 w-12 bg-[#e91e63] rounded-full"></div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {featuredProducts.slice(0, 4).map((product) => (
-                <ProductCard key={product.id} product={product} />
+            <Link to="/products">
+              <Button variant="ghost" className="text-sm font-bold text-zinc-500 hover:text-[#e91e63] hover:bg-[#e91e63]/5 rounded-full px-6 transition-all">
+                مشاهده همه محصولات
+                <ArrowLeft className="mr-2 w-4 h-4" />
+              </Button>
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-8">
+            {products.slice(0, 5).map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </section>
+
+        {/* Why Us Section */}
+        <section className="py-12 bg-zinc-50 rounded-[2.5rem] border border-zinc-100">
+          <div className="container px-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              {[
+                { icon: "🛡️", title: "اصالت کالا", desc: "تضمین ۱۰۰٪ کیفیت" },
+                { icon: "🚚", title: "ارسال سریع", desc: "تحویل درب منزل" },
+                { icon: "💬", title: "پشتیبانی", desc: "همراه شما هستیم" },
+                { icon: "🔒", title: "پرداخت امن", desc: "درگاه معتبر بانکی" }
+              ].map((item, i) => (
+                <div key={i} className="flex flex-col items-center text-center space-y-2 group cursor-default">
+                  <div className="w-16 h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl group-hover:scale-110 group-hover:shadow-md transition-all duration-300">
+                    {item.icon}
+                  </div>
+                  <h4 className="font-black text-zinc-800 text-sm">{item.title}</h4>
+                  <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">{item.desc}</p>
+                </div>
               ))}
             </div>
           </div>
         </section>
-      )}
-
-      {/* Benefits */}
-      <section className="py-16 border-y">
-        <div className="container">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="flex flex-col items-center text-center space-y-2">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-                <span className="text-primary font-bold">✓</span>
-              </div>
-              <h3 className="font-bold">ضمانت اصالت</h3>
-              <p className="text-xs text-muted-foreground">تضمین ۱۰۰٪ اصالت کالا</p>
-            </div>
-            <div className="flex flex-col items-center text-center space-y-2">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-                <span className="text-primary font-bold">🚚</span>
-              </div>
-              <h3 className="font-bold">ارسال سریع</h3>
-              <p className="text-xs text-muted-foreground">ارسال به سراسر کشور</p>
-            </div>
-            <div className="flex flex-col items-center text-center space-y-2">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-                <span className="text-primary font-bold">📞</span>
-              </div>
-              <h3 className="font-bold">پشتیبانی آنلاین</h3>
-              <p className="text-xs text-muted-foreground">پاسخگویی سریع به سوالات</p>
-            </div>
-            <div className="flex flex-col items-center text-center space-y-2">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-                <span className="text-primary font-bold">💳</span>
-              </div>
-              <h3 className="font-bold">پرداخت امن</h3>
-              <p className="text-xs text-muted-foreground">درگاه‌های بانکی معتبر</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Discounted Products */}
-      {discountedProducts.length > 0 && (
-        <section className="py-20">
-          <div className="container">
-            <div className="flex flex-col md:flex-row items-center justify-between mb-12 gap-4">
-              <div>
-                <h2 className="text-3xl font-extrabold mb-2 text-destructive">تخفیف‌های شگفت‌انگیز</h2>
-                <p className="text-muted-foreground">فرصت محدود برای خرید با قیمت‌های استثنایی</p>
-              </div>
-              <Link to="/products">
-                <Button variant="ghost" className="text-primary hover:bg-primary/5 rounded-full">
-                  مشاهده همه تخفیف‌ها
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {discountedProducts.slice(0, 4).map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* All Products when no featured */}
-      {featuredProducts.length === 0 && discountedProducts.length === 0 && products.length > 0 && (
-        <section className="py-16">
-          <div className="container">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold">محصولات</h2>
-              <Link to="/products" className="text-primary hover:underline flex items-center gap-1">
-                مشاهده همه
-                <ArrowLeft className="h-4 w-4" />
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.slice(0, 6).map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Empty State */}
-      {!isLoading && products.length === 0 && (
-        <section className="py-16">
-          <div className="container text-center">
-            <h2 className="text-2xl font-bold mb-4">هنوز محصولی اضافه نشده</h2>
-            <p className="text-muted-foreground">
-              از پنل مدیریت محصولات جدید اضافه کنید
-            </p>
-          </div>
-        </section>
-      )}
-
-      {/* CTA */}
-      {settings && (
-        <section className="py-16 bg-muted/50">
-          <div className="container text-center space-y-4">
-            <h2 className="text-2xl md:text-3xl font-bold">مشاوره رایگان خرید</h2>
-            <p className="text-muted-foreground max-w-lg mx-auto">
-              برای انتخاب بهترین محصولات متناسب با نوع پوست خود، با کارشناسان ما تماس بگیرید.
-            </p>
-            <div className="flex justify-center gap-3 pt-2">
-              <Link to="/products">
-                <Button className="gap-2">
-                  مشاهده محصولات
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
+      </div>
     </Layout>
   );
 };
