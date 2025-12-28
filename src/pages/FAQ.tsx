@@ -14,7 +14,14 @@ const FAQ = () => {
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await supabase.from('faqs').select('*').order('order_index', { ascending: true });
+        const res = await supabase.from('faqs').select('*').order('order_index', { ascending: true });
+        if (res.error) throw res.error;
+        let data = res.data as FAQItem[] | null;
+        // fallback: some DBs use singular 'faq'
+        if ((!data || data.length === 0) && !res.error) {
+          const alt = await supabase.from('faq').select('*').order('order_index', { ascending: true });
+          if (!alt.error && alt.data) data = alt.data as any;
+        }
         setFaqs((data as FAQItem[]) || []);
       } catch (err) {
         console.error('Error fetching faqs', err);
