@@ -53,6 +53,7 @@ export interface SiteSettings {
   return_policy?: string | null;
   privacy_policy?: string | null;
   terms_conditions?: string | null;
+  article_content?: string | null;
   purchase_enabled: boolean;
   enamad_code?: string | null;
   samandehi_code?: string | null;
