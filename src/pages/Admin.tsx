@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { 
   Plus, Pencil, Trash2, Package, Lock, LogOut, 
   Settings, Image, Layers, LayoutGrid, Save, 
-  ToggleLeft, ToggleRight, Upload, X
+  ToggleLeft, ToggleRight, Upload, X, RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -93,7 +93,6 @@ const Admin = () => {
 
   // Data states
   const [products, setProducts] = useState<Product[]>([]);
-  const [productSearch, setProductSearch] = useState<string>('');
   const [categories, setCategories] = useState<Category[]>([]);
   const [sliders, setSliders] = useState<Slider[]>([]);
   const [settings, setSettings] = useState<SiteSettings>(defaultSettings);
@@ -194,39 +193,17 @@ const Admin = () => {
     }
   };
 
-  const exportProductsCSV = (items: Product[]) => {
-    if (!items || items.length === 0) {
-      toast.info('هیچ محصولی برای خروجی وجود ندارد');
-      return;
+  const handleRefresh = async () => {
+    try {
+      setIsLoading(true);
+      await fetchData();
+      toast.success("داده‌ها بروزرسانی شد");
+    } catch (error: any) {
+      toast.error("خطا در بروزرسانی: " + (error?.message || error));
+    } finally {
+      setIsLoading(false);
     }
-
-    const headers = ['id','name','category','price','original_price','in_stock','featured','created_at'];
-    const rows = items.map((p) => [
-      p.id,
-      p.name.replace(/\n/g, ' '),
-      categories.find(c => c.id === p.category_id)?.name || '',
-      p.price?.toString() || '',
-      p.original_price?.toString() || '',
-      p.in_stock ? 'true' : 'false',
-      p.featured ? 'true' : 'false',
-      p.created_at || ''
-    ]);
-
-    const csvContent = [headers, ...rows].map(r => r.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(',')).join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'products.csv';
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success('خروجی CSV ایجاد شد');
   };
-
-  const visibleProducts = products.filter((p) => {
-    if (!productSearch) return true;
-    return p.name.toLowerCase().includes(productSearch.toLowerCase());
-  });
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -605,13 +582,19 @@ const Admin = () => {
       
       {/* Header */}
       <header className="border-b bg-card sticky top-0 z-50">
-        <div className="container flex items-center justify-between h-16">
-          <h1 className="text-xl font-bold">پنل مدیریت</h1>
-          <Button variant="outline" onClick={handleLogout} className="gap-2">
-            <LogOut className="h-4 w-4" />
-            خروج
-          </Button>
-        </div>
+          <div className="container flex items-center justify-between h-16">
+            <h1 className="text-xl font-bold">پنل مدیریت</h1>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={handleRefresh} className="gap-2">
+                <RefreshCw className="h-4 w-4" />
+                {isLoading ? 'در حال بروزرسانی...' : 'بروزرسانی'}
+              </Button>
+              <Button variant="outline" onClick={handleLogout} className="gap-2">
+                <LogOut className="h-4 w-4" />
+                خروج
+              </Button>
+            </div>
+          </div>
       </header>
 
       <main className="container py-8">
@@ -619,15 +602,15 @@ const Admin = () => {
           <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
             <TabsTrigger value="products" className="gap-2">
               <Package className="h-4 w-4" />
-              <span className="hidden sm:inline">محصولات</span>
+              <span className="hidden sm:inline">محصولات <span className="ml-2 text-sm text-muted-foreground">({products.length})</span></span>
             </TabsTrigger>
             <TabsTrigger value="categories" className="gap-2">
               <LayoutGrid className="h-4 w-4" />
-              <span className="hidden sm:inline">دسته‌بندی‌ها</span>
+              <span className="hidden sm:inline">دسته‌بندی‌ها <span className="ml-2 text-sm text-muted-foreground">({categories.length})</span></span>
             </TabsTrigger>
             <TabsTrigger value="sliders" className="gap-2">
               <Image className="h-4 w-4" />
-              <span className="hidden sm:inline">اسلایدرها</span>
+              <span className="hidden sm:inline">اسلایدرها <span className="ml-2 text-sm text-muted-foreground">({sliders.length})</span></span>
             </TabsTrigger>
             <TabsTrigger value="settings" className="gap-2">
               <Settings className="h-4 w-4" />
@@ -642,20 +625,10 @@ const Admin = () => {
                 <h2 className="text-2xl font-bold">محصولات</h2>
                 <p className="text-muted-foreground">{products.length} محصول</p>
               </div>
-              <div className="flex items-center gap-3">
-                <Input
-                  placeholder="جستجو بر اساس نام محصول"
-                  value={productSearch}
-                  onChange={(e) => setProductSearch(e.target.value)}
-                  className="max-w-xs text-sm"
-                />
-                <Button variant="outline" size="sm" onClick={() => exportProductsCSV(products)}>
-                  خروجی CSV
-                </Button>
-                <Dialog open={productDialogOpen} onOpenChange={(open) => {
-                  setProductDialogOpen(open);
-                  if (!open) resetProductForm();
-                }}>
+              <Dialog open={productDialogOpen} onOpenChange={(open) => {
+                setProductDialogOpen(open);
+                if (!open) resetProductForm();
+              }}>
                 <DialogTrigger asChild>
                   <Button className="gap-2">
                     <Plus className="h-4 w-4" />
@@ -802,14 +775,14 @@ const Admin = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {visibleProducts.length === 0 ? (
+                  {products.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
                         هیچ محصولی یافت نشد
                       </TableCell>
                     </TableRow>
                   ) : (
-                    visibleProducts.map((product) => (
+                    products.map((product) => (
                       <TableRow key={product.id}>
                         <TableCell>
                           <img 
