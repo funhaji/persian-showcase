@@ -17,6 +17,7 @@ const DynamicPage = () => {
     'terms': { title: 'قوانین و مقررات', content: settings?.terms_conditions },
     'careers': { title: 'فرصت‌های شغلی', content: 'در حال حاضر فرصت شغلی فعالی وجود ندارد.' },
     'guide': { title: 'راهنمای خرید و پرداخت', content: 'به زودی راهنمای جامع خرید اضافه خواهد شد.' },
+    'article': { title: 'مقالات و اخبار', content: settings?.article_content },
   };
 
   const currentPage = pageData[path] || { title: 'صفحه یافت نشد', content: null };
@@ -26,9 +27,11 @@ const DynamicPage = () => {
       <Layout>
         <div className="container py-16 animate-pulse">
           <div className="h-8 bg-muted rounded w-1/4 mb-8"></div>
-          <div className="h-4 bg-muted rounded w-full mb-4"></div>
-          <div className="h-4 bg-muted rounded w-full mb-4"></div>
-          <div className="h-4 bg-muted rounded w-3/4"></div>
+          <div className="space-y-4">
+            <div className="h-4 bg-muted rounded w-full"></div>
+            <div className="h-4 bg-muted rounded w-full"></div>
+            <div className="h-4 bg-muted rounded w-3/4"></div>
+          </div>
         </div>
       </Layout>
     );
@@ -40,16 +43,23 @@ const DynamicPage = () => {
         title={`${currentPage.title} - ${settings?.site_name}`} 
         description={settings?.site_description || ''}
       />
-      <div className="container py-16">
-        <h1 className="text-3xl font-bold mb-8">{currentPage.title}</h1>
-        <div className="prose prose-lg dark:prose-invert max-w-none">
-          {currentPage.content ? (
-            <div dangerouslySetInnerHTML={{ __html: currentPage.content.replace(/\n/g, '<br />') }} />
-          ) : (
-            <p className="text-muted-foreground italic">
-              هنوز اطلاعاتی برای این بخش وارد نشده است. از پنل مدیریت محتوا را اضافه کنید.
-            </p>
-          )}
+      <div className="container py-16 max-w-4xl mx-auto">
+        <div className="bg-card p-8 md:p-12 rounded-2xl shadow-sm border border-border/50">
+          <h1 className="text-3xl font-bold mb-8 pb-4 border-b border-primary/20 text-primary">{currentPage.title}</h1>
+          <div className="prose prose-lg dark:prose-invert max-w-none leading-relaxed text-foreground/90">
+            {currentPage.content ? (
+              <div 
+                className="prose-p:mb-6 prose-headings:text-primary prose-headings:mt-8 prose-headings:mb-4"
+                dangerouslySetInnerHTML={{ __html: currentPage.content.replace(/\n/g, '<br />') }} 
+              />
+            ) : (
+              <div className="bg-muted/30 p-8 rounded-xl text-center border border-dashed border-muted">
+                <p className="text-muted-foreground italic text-lg">
+                  هنوز اطلاعاتی برای این بخش وارد نشده است. از پنل مدیریت محتوا را اضافه کنید.
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </Layout>
