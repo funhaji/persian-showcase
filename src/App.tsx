@@ -1,59 +1,42 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { HelmetProvider } from "react-helmet-async";
-import { ThemeProvider } from "@/contexts/ThemeContext";
-import { CartProvider } from "@/contexts/CartContext";
+import { Toaster } from "@/components/ui/sonner";
 import { SiteProvider } from "@/contexts/SiteContext";
-import Index from "./pages/Index";
-import Products from "./pages/Products";
-import ProductDetail from "./pages/ProductDetail";
-import Cart from "./pages/Cart";
-import Checkout from "./pages/Checkout";
-import Admin from "./pages/Admin";
-import About from "./pages/About";
-import DynamicPage from "./pages/DynamicPage";
-import NotFound from "./pages/NotFound";
+import { CartProvider } from "@/contexts/CartContext";
 
-const queryClient = new QueryClient();
+// Pages
+import Index from "@/pages/Index";
+import ProductDetail from "@/pages/ProductDetail";
+import Cart from "@/pages/Cart";
+import Admin from "@/pages/Admin";
+import About from "@/pages/About";
+import Contact from "@/pages/Contact";
+import FAQ from "@/pages/FAQ";
+import Articles from "@/pages/Articles";
+import ArticleDetail from "@/pages/ArticleDetail";
 
-const App = () => (
-  <HelmetProvider>
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <SiteProvider>
-          <CartProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/products" element={<Products />} />
-                  <Route path="/product/:id" element={<ProductDetail />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/admin" element={<Admin />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/contact" element={<DynamicPage />} />
-                  <Route path="/faq" element={<DynamicPage />} />
-                  <Route path="/shipping" element={<DynamicPage />} />
-                  <Route path="/returns" element={<DynamicPage />} />
-                  <Route path="/privacy" element={<DynamicPage />} />
-                  <Route path="/terms" element={<DynamicPage />} />
-                  <Route path="/careers" element={<DynamicPage />} />
-                  <Route path="/guide" element={<DynamicPage />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
-            </TooltipProvider>
-          </CartProvider>
-        </SiteProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
-  </HelmetProvider>
-);
+function App() {
+  return (
+    <BrowserRouter>
+      <SiteProvider>
+        <CartProvider>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/products/:id" element={<ProductDetail />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/articles" element={<Articles />} />
+            <Route path="/articles/:slug" element={<ArticleDetail />} />
+            {/* Add other routes as needed */}
+            <Route path="*" element={<Index />} />
+          </Routes>
+          <Toaster />
+        </CartProvider>
+      </SiteProvider>
+    </BrowserRouter>
+  );
+}
 
 export default App;
