@@ -126,7 +126,7 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Newsletter removed as requested */}
+        {/* Newsletter removed per request */}
       </div>
     </Layout>
   );
