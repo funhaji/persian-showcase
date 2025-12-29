@@ -25,14 +25,13 @@ const FAQ = () => {
         const res = await supabase
           .from('faqs')
           .select('*')
-          .eq('is_active', true)
           .order('order_index', { ascending: true });
         
         if (res.error) {
           console.error('Error fetching FAQs:', res.error);
-          throw res.error;
         }
         
+        console.log('All FAQs from database:', res.data);
         setFaqs((res.data as FAQItem[]) || []);
       } catch (err) {
         console.error('Error fetching faqs', err);
@@ -41,6 +40,11 @@ const FAQ = () => {
       }
     })();
   }, []);
+
+  const activeFaqs = faqs.filter(f => f.is_active);
+
+  console.log('Total FAQs:', faqs.length);
+  console.log('Active FAQs:', activeFaqs.length);
 
   return (
     <Layout>
@@ -53,17 +57,20 @@ const FAQ = () => {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
             <p className="text-muted-foreground mt-4">در حال بارگذاری...</p>
           </div>
-        ) : faqs.length === 0 ? (
-          settings?.faq ? (
-            <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: settings.faq }} />
-          ) : (
-            <div className="text-center py-10">
-              <p className="text-muted-foreground">هیچ پرسش و پاسخی یافت نشد.</p>
+        ) : activeFaqs.length === 0 ? (
+          <div className="space-y-4">
+            <div className="text-center py-10 bg-muted/50 rounded-lg border-2 border-dashed">
+              <p className="text-muted-foreground">هیچ پرسش و پاسخ فعالی یافت نشد.</p>
+              {faqs.length > 0 && (
+                <p className="text-sm text-amber-600 mt-2">
+                  {faqs.length} سوال غیرفعال وجود دارد. در پنل ادمین آن‌ها را فعال کنید.
+                </p>
+              )}
             </div>
-          )
+          </div>
         ) : (
           <Accordion>
-            {faqs.map((f) => (
+            {activeFaqs.map((f) => (
               <AccordionItem key={f.id} title={f.question}>
                 <div 
                   className="prose max-w-none" 
