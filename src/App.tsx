@@ -14,6 +14,7 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Admin from "./pages/Admin";
 import About from "./pages/About";
+import FAQ from "./pages/FAQ";
 import Articles from "./pages/Articles";
 import ArticleDetail from "./pages/ArticleDetail";
 import DynamicPage from "./pages/DynamicPage";
@@ -39,10 +40,10 @@ const App = () => (
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/admin" element={<Admin />} />
                   <Route path="/about" element={<About />} />
+                  <Route path="/faq" element={<FAQ />} />
                   <Route path="/articles" element={<Articles />} />
                   <Route path="/articles/:slug" element={<ArticleDetail />} />
                   <Route path="/contact" element={<DynamicPage />} />
-                  <Route path="/faq" element={<DynamicPage />} />
                   <Route path="/shipping" element={<DynamicPage />} />
                   <Route path="/returns" element={<DynamicPage />} />
                   <Route path="/privacy" element={<DynamicPage />} />
