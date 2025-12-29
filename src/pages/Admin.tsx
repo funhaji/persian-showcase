@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { 
   Plus, Pencil, Trash2, Package, Lock, LogOut, 
   Settings, Image, Layers, LayoutGrid, Save, 
-  ToggleLeft, ToggleRight, Upload, X, RefreshCw, FileText, HelpCircle
+  ToggleLeft, ToggleRight, Upload, RefreshCw, FileText, HelpCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -91,16 +91,13 @@ const Admin = () => {
     );
   }
 
-  // Data states
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [sliders, setSliders] = useState<Slider[]>([]);
   const [settings, setSettings] = useState<SiteSettings>(defaultSettings);
-  // Articles & FAQs
-  const [articles, setArticles] = useState<Array<{id: string; title: string; slug?: string | null; content: string; excerpt?: string | null;}>>([]);
+  const [articles, setArticles] = useState<Array<{id: string; title: string; slug?: string | null; content: string; excerpt?: string | null; published?: boolean}>>([]);
   const [faqs, setFaqs] = useState<Array<{id: string; question: string; answer: string; order_index: number; is_active: boolean;}>>([]);
   
-  // Dialog states
   const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [sliderDialogOpen, setSliderDialogOpen] = useState(false);
@@ -112,7 +109,6 @@ const Admin = () => {
   const [editingArticle, setEditingArticle] = useState<any | null>(null);
   const [editingFaq, setEditingFaq] = useState<any | null>(null);
   
-  // Form states
   const [productForm, setProductForm] = useState({
     name: '',
     description: '',
@@ -183,7 +179,6 @@ const Admin = () => {
     }
   };
 
-  // Fetch data
   useEffect(() => {
     const savedAuth = localStorage.getItem('admin_authenticated');
     if (savedAuth === 'true') {
@@ -254,7 +249,6 @@ const Admin = () => {
     toast.info("از پنل مدیریت خارج شدید");
   };
 
-  // Product CRUD
   const handleSaveProduct = async () => {
     if (!productForm.name || !productForm.category_id) {
       toast.error("لطفا فیلدهای ضروری را پر کنید");
@@ -288,8 +282,9 @@ const Admin = () => {
       fetchData();
     } catch (error: any) {
       toast.error("خطا: " + error.message);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(true);
   };
 
   const handleDeleteProduct = async (id: string) => {
@@ -338,7 +333,6 @@ const Admin = () => {
     setProductDialogOpen(true);
   };
 
-  // Category CRUD
   const handleSaveCategory = async () => {
     if (!categoryForm.name || !categoryForm.slug) {
       toast.error("لطفا فیلدهای ضروری را پر کنید");
@@ -364,8 +358,9 @@ const Admin = () => {
       fetchData();
     } catch (error: any) {
       toast.error("خطا: " + error.message);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const handleDeleteCategory = async (id: string) => {
@@ -396,7 +391,6 @@ const Admin = () => {
     setCategoryDialogOpen(true);
   };
 
-  // Slider CRUD
   const handleSaveSlider = async () => {
     if (!sliderForm.title || !sliderForm.image) {
       toast.error("لطفا فیلدهای ضروری را پر کنید");
@@ -432,8 +426,9 @@ const Admin = () => {
       fetchData();
     } catch (error: any) {
       toast.error("خطا: " + error.message);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const handleDeleteSlider = async (id: string) => {
@@ -476,7 +471,6 @@ const Admin = () => {
     setSliderDialogOpen(true);
   };
 
-  // Articles CRUD
   const resetArticleForm = () => {
     setArticleForm({ title: '', slug: '', content: '', excerpt: '', published: true });
     setEditingArticle(null);
@@ -517,8 +511,9 @@ const Admin = () => {
       fetchData();
     } catch (error: any) {
       toast.error("خطا: " + error.message);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const handleDeleteArticle = async (id: string) => {
@@ -533,7 +528,6 @@ const Admin = () => {
     }
   };
 
-  // FAQ CRUD
   const resetFaqForm = () => {
     setFaqForm({ question: '', answer: '', order_index: 0, is_active: true });
     setEditingFaq(null);
@@ -566,8 +560,9 @@ const Admin = () => {
       fetchData();
     } catch (error: any) {
       toast.error("خطا: " + error.message);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const handleDeleteFaq = async (id: string) => {
@@ -582,7 +577,6 @@ const Admin = () => {
     }
   };
 
-  // Settings
   const handleSaveSettings = async () => {
     setSavingSettings(true);
     try {
@@ -607,6 +601,7 @@ const Admin = () => {
             return_policy: settings.return_policy,
             privacy_policy: settings.privacy_policy,
             terms_conditions: settings.terms_conditions,
+            article_content: settings.article_content,
             purchase_enabled: settings.purchase_enabled,
             enamad_code: settings.enamad_code,
             samandehi_code: settings.samandehi_code,
@@ -633,6 +628,7 @@ const Admin = () => {
           return_policy: settings.return_policy,
           privacy_policy: settings.privacy_policy,
           terms_conditions: settings.terms_conditions,
+          article_content: settings.article_content,
           purchase_enabled: settings.purchase_enabled,
           enamad_code: settings.enamad_code,
           samandehi_code: settings.samandehi_code,
@@ -644,15 +640,15 @@ const Admin = () => {
       fetchData();
     } catch (error: any) {
       toast.error("خطا: " + error.message);
+    } finally {
+      setSavingSettings(false);
     }
-    setSavingSettings(false);
   };
 
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <SEO title="ورود به پنل مدیریت" />
-        
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
@@ -712,21 +708,20 @@ const Admin = () => {
     <div className="min-h-screen bg-background">
       <SEO title="پنل مدیریت" />
       
-      {/* Header */}
       <header className="border-b bg-card sticky top-0 z-50">
-          <div className="container flex items-center justify-between h-16">
-            <h1 className="text-xl font-bold">پنل مدیریت</h1>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={handleRefresh} className="gap-2">
-                <RefreshCw className="h-4 w-4" />
-                {isLoading ? 'در حال بروزرسانی...' : 'بروزرسانی'}
-              </Button>
-              <Button variant="outline" onClick={handleLogout} className="gap-2">
-                <LogOut className="h-4 w-4" />
-                خروج
-              </Button>
-            </div>
+        <div className="container flex items-center justify-between h-16">
+          <h1 className="text-xl font-bold">پنل مدیریت</h1>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={handleRefresh} className="gap-2" disabled={isLoading}>
+              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              {isLoading ? 'در حال بروزرسانی...' : 'بروزرسانی'}
+            </Button>
+            <Button variant="outline" onClick={handleLogout} className="gap-2">
+              <LogOut className="h-4 w-4" />
+              خروج
+            </Button>
           </div>
+        </div>
       </header>
 
       <main className="container py-8">
@@ -750,7 +745,7 @@ const Admin = () => {
             </TabsTrigger>
             <TabsTrigger value="faqs" className="gap-2">
               <HelpCircle className="h-4 w-4" />
-              <span className="hidden sm:inline">پرسش‌ها <span className="ml-2 text-sm text-muted-foreground">({faqs.length})</span></span>
+              <span className="hidden sm:inline">پرش‌ها <span className="ml-2 text-sm text-muted-foreground">({faqs.length})</span></span>
             </TabsTrigger>
             <TabsTrigger value="settings" className="gap-2">
               <Settings className="h-4 w-4" />
@@ -758,7 +753,6 @@ const Admin = () => {
             </TabsTrigger>
           </TabsList>
 
-          {/* Products Tab */}
           <TabsContent value="products" className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
@@ -981,7 +975,6 @@ const Admin = () => {
             </div>
           </TabsContent>
 
-          {/* Categories Tab */}
           <TabsContent value="categories" className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
@@ -1087,7 +1080,6 @@ const Admin = () => {
             </div>
           </TabsContent>
 
-          {/* Sliders Tab */}
           <TabsContent value="sliders" className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
@@ -1234,7 +1226,6 @@ const Admin = () => {
             </div>
           </TabsContent>
 
-          {/* Articles Tab */}
           <TabsContent value="articles" className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
@@ -1305,7 +1296,7 @@ const Admin = () => {
                       <TableRow key={a.id}>
                         <TableCell className="font-medium">{a.title}</TableCell>
                         <TableCell>{a.slug || a.id}</TableCell>
-                        <TableCell>{/* show published */}{a.published ? <span className="text-green-600">منتشر شده</span> : <span className="text-muted-foreground">پیش‌نویس</span>}</TableCell>
+                        <TableCell>{a.published ? <span className="text-green-600">منتشر شده</span> : <span className="text-muted-foreground">پیش‌نویس</span>}</TableCell>
                         <TableCell className="text-left">
                           <div className="flex items-center justify-end gap-2">
                             <Button variant="ghost" size="icon" onClick={() => openEditArticle(a)}>
@@ -1324,11 +1315,10 @@ const Admin = () => {
             </div>
           </TabsContent>
 
-          {/* FAQs Tab */}
           <TabsContent value="faqs" className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold">پرسش‌ها (FAQ)</h2>
+                <h2 className="text-2xl font-bold">پرش‌ها (FAQ)</h2>
                 <p className="text-muted-foreground">{faqs.length} آیتم</p>
               </div>
               <Dialog open={faqDialogOpen} onOpenChange={(open) => { setFaqDialogOpen(open); if (!open) resetFaqForm(); }}>
@@ -1409,10 +1399,8 @@ const Admin = () => {
             </div>
           </TabsContent>
 
-          {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Main Settings */}
               <div className="lg:col-span-2 space-y-6">
                 <Card>
                   <CardHeader>
@@ -1552,6 +1540,15 @@ const Admin = () => {
                       />
                     </div>
                     <div className="space-y-2">
+                      <Label>محتوای مقالات (برای فوتر)</Label>
+                      <Textarea 
+                        value={settings.article_content || ''} 
+                        onChange={(e) => setSettings({...settings, article_content: e.target.value})}
+                        rows={3}
+                        placeholder="محتوای نمایشی مقالات در فوتر..."
+                      />
+                    </div>
+                    <div className="space-y-2">
                       <Label>نشانی فروشگاه</Label>
                       <Input 
                         value={settings.address || ''} 
@@ -1598,11 +1595,18 @@ const Admin = () => {
                         placeholder="https://t.me/username"
                       />
                     </div>
+                    <div className="space-y-2">
+                      <Label>لینکدین</Label>
+                      <Input 
+                        value={settings.linkedin_url || ''} 
+                        onChange={(e) => setSettings({...settings, linkedin_url: e.target.value})}
+                        placeholder="https://linkedin.com/in/username"
+                      />
+                    </div>
                   </CardContent>
                 </Card>
               </div>
 
-              {/* Side Panels */}
               <div className="space-y-6">
                 <Card>
                   <CardHeader>
@@ -1646,6 +1650,7 @@ const Admin = () => {
                         onChange={(e) => setSettings({...settings, enamad_code: e.target.value})}
                         placeholder="کد HTML اینماد..."
                         className="font-mono text-xs"
+                        rows={3}
                       />
                     </div>
                     <div className="space-y-2">
@@ -1655,6 +1660,7 @@ const Admin = () => {
                         onChange={(e) => setSettings({...settings, samandehi_code: e.target.value})}
                         placeholder="کد HTML ساماندهی..."
                         className="font-mono text-xs"
+                        rows={3}
                       />
                     </div>
                   </CardContent>
